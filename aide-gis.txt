@@ -1,0 +1,18 @@
+#agro
+ogr2ogr -sql "select * from municipios_br LEFT JOIN 'agro.csv'.agro ON municipios_br.CODIGO_MUN = agro.CODIGO_MUN" tmp5.shp municipios_br.shp 
+
+#PR_PRODES
+ogr2ogr -sql "select *, CAST( CONCAT(CAST(PATH as character(3)),CAST(ROW as character(3))) AS character(6) ) AS PR_PRODES from wrs2_descending_SA where PATH>=100" wrs2_descending_SA_PRODES1.shp wrs2_descending_SA.shp
+ogr2ogr -sql "select *, CAST( CONCAT('0',CAST(PATH as character(3)),CAST(ROW as character(3))) AS character(6) ) AS PR_PRODES from wrs2_descending_SA where PATH>=10 AND PATH<100" wrs2_descending_SA_PRODES2.shp wrs2_descending_SA.shp
+ogr2ogr -sql "select *, CAST( CONCAT('00',CAST(PATH as character(3)),CAST(ROW as character(3))) AS character(6) ) AS PR_PRODES from wrs2_descending_SA where PATH<10" wrs2_descending_SA_PRODES3.shp wrs2_descending_SA.shp
+ogr2ogr -sql "select AREA,PERIMETER,PR,PATH,ROW,PR_PRODES from wrs2_descending_SA_PRODES1" wrs2_descending_SA_PRODES.shp wrs2_descending_SA_PRODES1.shp
+
+
+wrs_amaz=`dbfdump /data/research/data/gis/grids/wrs2_descending_amaz_PRODES.shp | awk '{ if(NR>1)print("\"" $6 "\",")}' | sort | uniq`
+wrs_border=`dbfdump /data/research/data/gis/grids/wrs2_descending_border_PRODES.shp | awk '{ if(NR>1)print("\"" $6 "\",")}' | sort | uniq`
+wrs_cerrado=`dbfdump /data/research/data/gis/grids/wrs2_descending_cerrado_PRODES.shp | awk '{ if(NR>1)print("\"" $6 "\",")}' | sort | uniq`
+
+for y in `seq 2000 2011`; do echo $y; rm  tmp-$y.tif; val_repl.py -in 1 -in2 365 -out 1 -c lg  MCD45.burndate.cerramaz.$y.sin.tif tmp-$y.tif ; done
+gdal_calc.py -A tmp-2000.tif -B tmp-2001.tif -C tmp-2002.tif -D tmp-2003.tif -E tmp-2004.tif -F tmp-2005.tif -G tmp-2006.tif -H tmp-2007.tif -I tmp-2008.tif -J tmp-2009.tif -K tmp-2010.tif -L tmp-2011.tif --calc "A+B+C+D+E+F+G+H+I+J+K+L" --outfile tmp-tot.tif --type Int16 
+gdal_calc.py -A tmp-tot.tif --calc "A/11.0*100" --outfile tmp-freq.tif --type Float32
+gdalwarp  -t_srs EPSG:4632 -co COMPRESS=DEFLATE -overwrite -srcnodata 0 -dstnodata 0 tmp-freq.tif tmp-freq-wgs84.tif

@@ -1,0 +1,122 @@
+==== TRMM
+cdo mergetime 3B43.* 3B43.1998-2010.nc
+cdo sellonlatbox,-85.25,-29.75,15.25,-50 3B43.1998-2010.nc 3B43.sam.1998-2010.nc
+cdo selvar,pcp 3B43.err.1998-2010.nc 3B43.err.sam.1998-2010.nc
+cdo selvar,err 3B43.sam.1998-2010.nc 3B43.err.sam.1998-2010.nc
+cdo yearmean 3B43.pcp.sam.1998-2010.nc tmp1.nc
+
+year=${ifile:5:2}   
+month=${ifile:7:2}
+day=${ifile:9:2}
+
+if [[ ${year:0:1} -eq "9" ]]; then year="19"$year  ; else year="20"$year; fi
+
+==== trmm-merge CPTEC
+for f in prec_*.ctl; do f_nc=`echo $f |  sed 's/.ctl/.nc/'`; echo $f $f_nc ;  cdo -f nc import_binary $f $f_nc ; done
+for y in `seq 1998 2010`; do echo $y; cdo -r mergetime prec_$y*.nc tmp_$y.nc; done
+#missing file in 2009
+cdo -r mergetime prec_2009*.nc tmp_2009.nc
+cdo -r mergetime tmp*.nc trmm_merge.1998-2010.nc
+cdo chname,prec,pcp -selvar,prec trmm_merge.1998-2010.nc trmm_merge.pcp.sam.1998-2010.nc
+cdo selvar,nest trmm_merge.1998-2010.nc trmm_merge.nest.sam.1998-2010.nc 
+ncap2 -s "nest=short(nest);" tmp1.nc trmm_merge.nest.sam.1998-2010.nc
+
+==== files
+product.variable.region.period(.projection).ext
+
+
+===l3jrc
+gdal_translate -projwin -82.1 13.1 -33.9 -55.55 -co "COMPRESS=DEFLATE" l3jrc.2000.tif l3jrc.sam.2000.tif
+
+
+===ogr stuff
+ ogr2ogr -t_srs 'EPSG:4326' brazil-wgs84.shp brazil.shp
+ogr2ogr -t_srs 'EPSG:4618' uc_fed_14outl2010.shp uc_fed_14outl2010.sad69.shp
+ogr2ogr -t_srs 'EPSG:4618' uc_fed_14outl2010_sad69.shp uc_fed_14outl2010.shp
+ogr-merge PN_pol.shp PNA_pol.shp  PNCG_pol.shp  PNE_pol.shp PNSCa_pol-sad69.shp PNB_pol.shp  PNCV_pol.shp  PNSCi_pol.shp
+
+=== PN*
+for ifile in PN*.tif; do  ofileb=`namename $ifile`; echo gdalwarp -t_srs EPSG:32722 $ifile $ofileb-utm22s.tif ; done
+
+
+=== truemarble
+http://linfiniti.com/2009/09/image-mosaicking-with-gdal/
+http://ian01.geog.psu.edu/geoserver_docs/data/bluemarble/bluemarble.html
+
+gdalwarp -t_srs "$PROJ_MSIN" -tr 463.312716527778 463.312716527778 -co COMPRESS=DEFLATE -co TILED=yes BlueMarble.200407.sam.tif BlueMarble.200407.sam-msin.tif
+
+gdal_translate -co COMPRESS=JPEG -co PHOTOMETRIC=YCBCR -co JPEG_QUALITY=100 -projwin -82.1 13.1 -33.9 -55.55 TrueMarble.1km.A1.tif TrueMarble.1km.sam.tif
+
+gdal_translate -co COMPRESS=DEFLATE -co TILED=yes -projwin -82.1 13.1 -45 0 ../TrueMarble.250m.21600x21600.C2.tif TrueMarble.250m.C2.sam.tif
+gdal_translate -co COMPRESS=DEFLATE -co TILED=yes -projwin -82.1 0 -45 -45 ../TrueMarble.250m.21600x21600.C3.tif TrueMarble.250m.C3.sam.tif
+gdal_translate -co COMPRESS=DEFLATE -co TILED=yes -projwin -82.1 -45 -45 -56.1 ../TrueMarble.250m.21600x21600.C4.tif TrueMarble.250m.C4.sam.tif
+gdal_translate -co COMPRESS=DEFLATE -co TILED=yes -projwin -45 13.1 -33.9 0 ../TrueMarble.250m.21600x21600.D2.tif TrueMarble.250m.D2.sam.tif
+gdal_translate -co COMPRESS=DEFLATE -co TILED=yes -projwin -45 0 -33.9 -45 ../TrueMarble.250m.21600x21600.D3.tif TrueMarble.250m.D3.sam.tif
+gdal_translate -co COMPRESS=DEFLATE -co TILED=yes -projwin -45 -45 -33.9 -56.1 ../TrueMarble.250m.21600x21600.D4.tif TrueMarble.250m.D4.sam.tif
+
+gdalwarp -co COMPRESS=DEFLATE -co TILED=yes -co BIGTIFF=yes  TrueMarble.250m.D* TrueMarble.250m.sam2.tif
+gdalwarp -co COMPRESS=DEFLATE -co TILED=yes -co BIGTIFF=yes  TrueMarble.250m.C* TrueMarble.250m.sam1.tif
+gdalwarp -co COMPRESS=JPEG -co PHOTOMETRIC=YCBCR -co JPEG_QUALITY=100 -co TILED=yes TrueMarble.250m.sam1.tif TrueMarble.250m.sam2.tif TrueMarble.250m.sam.tif
+
+--
+gdal_translate -co COMPRESS=DEFLATE -co TILED=yes -projwin -82.1 13.1 -33.9 0 world.topo.200407.3x21600x21600.B1.tif sam.B1.tif
+gdal_translate -co COMPRESS=DEFLATE -co TILED=yes -projwin -82.1 0 -33.9 -56.1 world.topo.200407.3x21600x21600.B2.tif sam.B2.tif
+-gdal_translate -co COMPRESS=DEFLATE -co TILED=yes -projwin -82.1 13.1 -33.9 0 world.topo.200401.3x21600x21600.B1.tif sam.B1.tif
+-gdal_translate -co COMPRESS=DEFLATE -co TILED=yes -projwin -82.1 0 -33.9 -56.1 world.topo.200401.3x21600x21600.B2.tif sam.B2.tif
+gdalwarp -co COMPRESS=DEFLATE -co TILED=yes sam.B1.tif sam.B2.tif sam.tif
+cp sam.tif sam1.tif
+gdaladdo --config COMPRESS_OVERVIEW DEFLATE -r average sam.tif 2 4 8 16 32 64 128 256
+gdal_translate -co COMPRESS=JPEG  -co PHOTOMETRIC=YCBCR -co JPEG_QUALITY=100 -co TILED=yes -co COPY_SRC_OVERVIEWS=YES sam.tif sam-100.tif
+
+--AMSR-E / EASE-Grid
+gdal_translate -a_srs "+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +a=6371228
++b=6371228 +units=m +no_defs" -A_ullr -4524688.2625 4524688.2625 4524688.2625
+-4524688.2625 a14_n005_1996153_1400_albd.v3 output.tif
+a_srs – Specifies the projection to tag the created GeoTIFF with. Can be a PROJ.4 string as shown or
+an EPSG code in the form EPSG:3408
+-A_ullr – The projection coordinate corner points for the image in the form <upper left x> <upper left
+y> <lower right x> <lower right y>.
+The last two arguments are the input file and output file names. This command assumes that there is also
+an ENVI header file, a14_n005_1996153_1400_albd.v3.hdr in the same directory as the binary input
+file.
+2) Use gdalwarp to reproject the GeoTIFF created in step 1 to have matching projection and datum
+ellipsoids.
+gdalwarp -t_srs “+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +units=m
++no_defs” output.tif output.geotiff.tif
+-t_srs – Specifies the projection to reproject the GeoTIFF into. In this case we want to project to the
+GCS spheroid which is WGS84 but keep the rest of the projection the same.
+If using a version of PROJ.4 prior to 4.6.0 you need to add an additional flag to the command:
+-s_srs “+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +a=6371228 +b=6371228 +units=m
++no_defs” +nadgrids=@null +wktext
+
+
+=== probio
+gdal_rasterize  -tr 0.00005 0.00005  -a_nodata 255 -of GTiff  -a_srs EPSG:4618 -a "CLASSE_ID" -ot Byte -init 255 -at -l region1 region1.shp region1-2h.tif
+gdalwarp  -tr 0.0005 0.0005   region1-2h.tif region1-2hl.tif
+
+gdal_rasterize  -tr 0.00005 0.00005  -init 255 -a_nodata 255 -at -a "CLASSE" -replace_ids ../probio-vegtypes.csv CLASSE CLASSE_ID  -a_srs EPSG:4618 -of GTiff -ot Byte  -l region1 region1.shp region1-1h.tif
+ gdal_rasterize  -tr 0.00005 0.00005  -init 255 -a_nodata 255 -at -a "CLASSE" -replace_ids ../probio-vegtypes.csv CLASSE CLASSE_ID  -a_srs EPSG:4618 -of GTiff -ot Byte -co COMPRESS=LZW  -l vegetacao vegetacao.shp vegetacao-0005at.tif
+gdal_rasterize  -tr 0.001 0.001  -init 255 -a_nodata 255 -at -a "CLASSE" -replace_ids ../probio-vegtypes.csv CLASSE CLASSE_ID  -a_srs EPSG:4618 -of GTiff -ot Byte -co COMPRESS=LZW  -l vegetacao vegetacao.shp vegetacao-001at.tif 
+
+ogr2ogr -s_srs EPSG:4618 -t_srs '+proj=sinu +R=6371007.181 +nadgrids=@null +wktext' vegetacao-cerraro-msin.shp vegetacao.shp vegetacao
+gdal_rasterize  -tr 300 300  -init 255 -a_nodata 255 -at -a "CLASSE" -replace_ids ../probio-vegtypes.csv CLASSE CLASSE_ID -of GTiff -ot Byte -co COMPRESS=LZW  -l vegetacao-cerraro-msin  vegetacao-cerraro-msin.shp vegetacao-cerraro-msin-300m.tif
+
+
+==modis table
+- import .dbf into calc
+- modify entry like =CONCATENATE("h",TEXT(B2,"00"),"v",TEXT(C2,"00"))
+- fix table defs with base
+
+====varia
+
+for yy in `seq -w 01 11` ; do for mm in `seq -w 01 12`; do wget http://sigma.cptec.inpe.br/queimadas/foc_mensal/queima$yy$mm.gif ; done done
+=grid SA
+ ogr2ogr -clipdst -81.500000000001 12.500000000001 -34.499999999999 -56.000000000001 grid-SA-05.shp grid-global-05.shp grid-global-05
+ogr2ogr -clipdst -74.500000000001 5.500000000001 -34.499999999999 -34.000000000001 grid-BR-05.shp grid-SA-05.shp grid-SA-05
+
+#gtiff
+ for f in */*.tif.gz; do echo $f; fb=`basename $f` ; gdal_translate -co COMPRESS=DEFLATE /vsigzip/$f compress/$fb; done
+
+
+== get terraclass
+ wget -r -l 4 --no-parent -c -nc -nd -A "_shp.zip" http://quiririm.dmz.inpe.br/cra/Dados_web/ACRE/

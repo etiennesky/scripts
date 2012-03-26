@@ -1,0 +1,160 @@
+
+====
+--gdal
+
+
+http://trac.osgeo.org/gdal/wiki/HDF
+pre-reqa: libgeotiff +tiff +geos  hdf4 hdf5
+- python: ./configure --prefix=/home/soft --enable-shared
+- pysip
+- pyqt4
+
+libgeotiff:
+./configure --prefix=/home/soft --with-jpeg=yes --with-zlib=yes --with-zip=yes
+
+hdf4:
+./configure --prefix=/home/soft --with-szlib=/home/soft --disable-netcdf --disable-fortran
+
+netcdf:
+ ./configure --prefix=/home/soft --disable-hdf5 --disable-netcdf-4 --enable-shared
+
+geos:
+ ./configure --prefix=/home/soft --enable-python
+
+--qgis
+
+http://grass.osgeo.org/wiki/Compile_and_install_GRASS_and_QGIS_with_GDAL/OGR_Plugin
+
+gdal:
+./configure --prefix=/home/soft --with-python --with-poppler=yes --with-spatialite=yes  --with-geos=/home/soft/bin/geos-config --with-jpeg=internal --with-jpeg12 --with-libtiff=internal --with-geotiff=internal --with-png=internal --with-gif=internal --with-libz=internal
+
+#./configure --prefix=/home/soft --with-python --with-poppler=yes --with-spatialite=yes --with-geos=/home/soft/bin/geos-config
+
+# ./configure --prefix=/home/soft --with-python --with-poppler=yes --with-geos=yes --with-spatialite=yes  --with-mysql=yes
+**update this!! libtiff+geotiff
+#./configure --prefix=/home/soft --with-python --with-poppler=yes --with-geos=yes --with-spatialite=yes  --with-libtiff=/home/soft  --with-geotiff=/home/soft --with-geos=/home/soft/bin/geos-config --with-zlib=/usr
+
+grass:
++... cairo-dev freetype-dev motif-dev
+ ./configure --prefix=/home/soft  --with-mysql=yes --with-mysql-includes=/usr/include/mysql --with-mysql-libs=/usr --with-sqlite=yes --with-sqlite-includes=/usr/include --with-sqlite-libs=/usr --with-tcltk-libs=/usr/lib --with-tcltk-includes=/usr/include/tcl --with-readline  --with-python --with-cxx --with-proj
+./configure --prefix=/home/soft  --with-mysql=yes --with-mysql-includes=/usr/include/mysql --with-mysql-libs=/usr --with-sqlite=yes --with-sqlite-includes=/usr/include --with-sqlite-libs=/usr --with-tcltk-libs=/usr/lib --with-tcltk-includes=/usr/include/tcl8.5/ --with-readline  --with-python --with-cxx --with-proj=/usr --with-proj-share=/usr/share/proj/ --with-blas  --with-lapack --with-geos --with-wxwidgets=/usr/bin/wx-config --enable-64bit --with-postgres --with-postgres-includes=/usr/include/postgresql  --with-cairo --with-freetype --with-freetype-includes=/usr/include/freetype2 --with-odbc --with-motif
+
+qgis:
+cmake -D CMAKE_INSTALL_PREFIX=/home/soft -D PYTHON_EXECUTABLE=/home/soft/bin/python -D GRASS_PREFIX=/home/soft/grass-6.4.1/  .. 
+
+
+
+-----spatialite
+- libspatialite: ./configure --prefix=/home/soft --with-geos-include=/home/soft/include --with-geos-lib=/home/soft/lib --with-proj-include=/usr/include --with-proj-lib=/usr/lib 
+- libgeotiff: ./configure --prefix=/home/soft --with-zip=yes --with-jpeg=yes --enable-incode-epsg
+- librasterlite
+/home/src/spatialite-tools-2.3.1 $ ./configure --prefix=/home/soft --with-spatialite-lib=/home/soft/lib --with-geos-lib=/home/soft/lib  --with-proj-lib=/usr/lib
+checking for a BSD-compatible install... /usr/bin/install -c
+/home/src/spatialite-gui-1.2.1: edit Makefile-linux
+
+-----cdo
+ ./configure --prefix=/home/soft --with-zlib=/usr --with-szlib=/home/soft --with-jasper=/home/soft --with-grib_api=/home/soft --with-hdf5=/home/soft --with-netcdf=/home/soft
+
+
+-----grads
+reqs: bison lex curl curl-config* jasper libxt-dev libxaw7-dev libsx0 libsx-dev libgeotiff-dev libgd2-xpm-dev shapelib libshp-dev
+- udunits export CPPFLAGS='-DNDEBUG -Df2cFortran -I/home/soft/include'
+- udunits2
+- szip 
+- hdf5  ./configure --prefix=/home/soft --with-szlib=/home/soft --enable-fortran --enable-cxx
+- hdf4 ./configure --prefix=/home/soft --with-szlib=/home/soft --disable-netcdf --disable-fortran
+- netcdf ./configure --prefix=/home/soft --with-hdf5=/home/soft --enable-hdf4 --with-hdf4=/home/soft --with-szlib=/home/soft  // disable netcdf: ./configure --prefix=/home/soft --with-hdf5=/home/soft  --with-szlib=/home/soft  // disable netcdf
+//- grib-api
+
+./configure --prefix=/home/soft --with-gui --with-readline --with-printim --with-sdf --with-shp --with-geotiff --with-hdf4=/home/soft --with-hdf5=/home/soft --with-netcdf=/home/soft  ---bugggg
+In function ‘snprintf’,
+    inlined from ‘gxclvert’ at gxcntr.c:914:14:
+/usr/include/bits/stdio2.h:65:3: warning: call to __builtin___snprintf_chk will always overflow destination buffer
+In function ‘snprintf’,
+    inlined from ‘gxclvert’ at gxcntr.c:916:14:
+/usr/include/bits/stdio2.h:65:3: warning: call to __builtin___snprintf_chk will always overflow destination buffer
+In function ‘snprintf’,
+    inlined from ‘gxclvert’ at gxcntr.c:925:16:
+/usr/include/bits/stdio2.h:65:3: warning: call to __builtin___snprintf_chk will always overflow destination buffer
+In function ‘snprintf’,
+    inlined from ‘gxclvert’ at gxcntr.c:928:21:
+/usr/include/bits/stdio2.h:65:3: warning: call to __builtin___snprintf_chk will always overflow destination buffer
+In function ‘snprintf’,
+    inlined from ‘gxclvert’ at gxcntr.c:929:16:
+/usr/include/bits/stdio2.h:65:3: warning: call to __builtin___snprintf_chk will always overflow destination buffer
+In function ‘snprintf’,
+    inlined from ‘gxclvert’ at gxcntr.c:936:14:
+/usr/include/bits/stdio2.h:65:3: warning: call to __builtin___snprintf_chk will always overflow destination buffer
+gcc -DHAVE_CONFIG_H -I.  -I/usr/include  -I..//include/libsx   -I/home/soft/include -I/usr/include/geotiff     -I/usr/include -I/home/soft/include  -DNDEBUG -Df2cFortran -I/home/soft/include  -g -O2 -rdynamic -c gxstrm.c
+gcc -DHAVE_CONFIG_H -I.  -I/usr/include  -I..//include/libsx   -I/home/soft/include -I/usr/include/geotiff     -I/usr/include -I/home/soft/include  -DNDEBUG -Df2cFortran -I/home/soft/include  -g -O2 -rdynamic -c gxwmap.c
+gxwmap.c: In function ‘gxdmap’:
+gxwmap.c:87:12: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result
+gxwmap.c:136:10: warning: ignoring return value of ‘fread’, declared with attribute warn_unused_result
+gcc -DHAVE_CONFIG_H -I.  -I/usr/include  -I..//include/libsx   -I/home/soft/include -I/usr/include/geotiff     -I/usr/include -I/home/soft/include  -DNDEBUG -Df2cFortran -I/home/soft/include  -g -O2 -rdynamic -c gxshad.c
+gcc -DHAVE_CONFIG_H -I.  -I/usr/include  -I..//include/libsx   -I/home/soft/include -I/usr/include/geotiff     -I/usr/include -I/home/soft/include  -DNDEBUG -Df2cFortran -I/home/soft/include  -g -O2 -rdynamic -c gaexpr.c
+gcc -DHAVE_CONFIG_H -I.  -I/usr/include  -I..//include/libsx   -I/home/soft/include -I/usr/include/geotiff     -I/usr/include -I/home/soft/include  -DNDEBUG -Df2cFortran -I/home/soft/include  -g -O2 -rdynamic -c gafunc.c
+gcc -DHAVE_CONFIG_H -I.  -I/usr/include  -I..//include/libsx   -I/home/soft/include -I/usr/include/geotiff     -I/usr/include -I/home/soft/include  -DNDEBUG -Df2cFortran -I/home/soft/include  -g -O2 -rdynamic -c gautil.c
+gcc -DHAVE_CONFIG_H -I.  -I/usr/include  -I..//include/libsx   -I/home/soft/include -I/usr/include/geotiff     -I/usr/include -I/home/soft/include  -DNDEBUG -Df2cFortran -I/home/soft/include  -g -O2 -rdynamic -c gagx.c
+gagx.c:3882:40: error: expected declaration specifiers or ‘...’ before ‘DBFFieldType’
+gagx.c: In function ‘newdbfld’:
+gagx.c:3889:44: error: invalid application of ‘sizeof’ to incomplete type ‘struct dbfld’ 
+gagx.c:3891:18: error: dereferencing pointer to incomplete type
+gagx.c:3892:11: error: dereferencing pointer to incomplete type
+gagx.c:3892:20: error: ‘dbtype’ undeclared (first use in this function)
+gagx.c:3892:20: note: each undeclared identifier is reported only once for each function it appears in
+gagx.c:3893:11: error: dereferencing pointer to incomplete type
+gagx.c:3894:11: error: dereferencing pointer to incomplete type
+gagx.c:3895:11: error: dereferencing pointer to incomplete type
+gagx.c:3905:13: error: dereferencing pointer to incomplete type
+gagx.c:3908:13: error: dereferencing pointer to incomplete type
+gagx.c:3910:11: error: dereferencing pointer to incomplete type
+make[2]: *** [gagx.o] Error 1
+make[2]: Leaving directory `/home/src/grads-2.0.a9/src'
+make[1]: *** [all] Error 2
+make[1]: Leaving directory `/home/src/grads-2.0.a9/src'
+make: *** [all-recursive] Error 1
+
+
+
+
+---TUPA
+
+cdo: ./configure --prefix=$HOME/soft/ --with-netcdf=/opt/cray/netcdf/4.1.1.0/netcdf-gnu/
+
+proj
+geos
+szip
+hdf4: 
+export CFLAGS="-fPIC -DHAVE_NETCDF"
+  347  export CXXFLAGS="-fPIC -DHAVE_NETCDF"
+./configure --prefix=$HOME/soft --with-szlib=$HOME/soft --disable-netcdf --disable-fortran
+gdal: ./configure --prefix=$HOME/soft --with-geos=$HOME/soft/bin/geos-config --with-jpeg=internal --with-jpeg12 --with-libtiff=internal --with-geotiff=internal --with-png=internal --with-libz=internal --with-netcdf=$CRAY_NETCDF_DIR/netcdf-gnu --with-hdf4=$CRAY_HDF4_DIR/hdf4-gnu
+
+module unload PrgEnv-pgi
+module load PrgEnv-gnu
+module load netcdf
+module list
+
+
+---recent softdev
+
+- geos
+- hdf5  ./configure --prefix=/home/soft --with-szlib=/home/soft --disable-fortran --enable-cxx 
+- hdf4 ./configure --prefix=/home/soft --with-szlib=/home/soft --disable-netcdf --disable-fortran --enable-shared
+- netcdf 
+w/hdf5: ./configure --prefix=/home/softdev  --with-hdf5=/home/softdev --enable-netcdf4 --enable-hdf4 --with-hdf4=/home/softdev --with-szlib=/home/softdev --with-zlib=/usr --enable-shared
+wo/hdf5: ./configure --prefix=/home/softdev --disable-netcdf-4  --enable-shared
+gdal: ./configure --prefix=/home/softdev --with-python --with-poppler=yes --with-spatialite=yes  --with-geos=/home/soft/bin/geos-config --with-libtiff=internal --with-geotiff=internal
+/home/src/cdo-1.5.2 $ ./configure --prefix=/home/softdev --with-zlib=/usr --with-szlib=/home/softdev --with-hdf5=/home/softdev --with-netcdf=/home/softdev 
+
+
+
+
+
+
+
+
+= shit
+cdat_lite: 
+python setup.py bdist_egg
+ easy_install -d $PYTHONPATH dist/cdat-lite*.egg

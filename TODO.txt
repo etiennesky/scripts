@@ -1,0 +1,16 @@
+=== qspatialite
++ close button
++ wait cursor when loading file
++ use .shp by default, or *.*
+- remember last dir
+- use EPSG:4326 by default (or lats srid), or auto-detect
+- fix import files, using same name for all
+
+
+===qgis
++ ignore { *shp.zip , *.sqlite.zip } files
+- fiz *.zip - add option / silent isvalidraster / ...
+- scroll to new item (might not be possible)
+- browser: lazy loading based on extensions
+
+=== browser

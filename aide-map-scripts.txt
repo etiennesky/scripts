@@ -1,0 +1,45 @@
+process-mcd12q1
+
+gdalwarp -of vrt -co COMPRESS=DEFLATE -t_srs EPSG:4326 -tr 0.00390625 0.00390625 MCD12Q1.IGBP.SA.2002.msin.tif imap-128.vrt
+gdal_translate -co COMPRESS=DEFLATE -projwin -82.0 13.0 -34.0 -56.0  imap-128.vrt imap-128.tif
+makemaplevels.py imap-128.tif omap-128.tif 
+
+gdalwarp -of vrt -co COMPRESS=DEFLATE -t_srs EPSG:4326 -tr 0.00416666666666667 0.00416666666666667 MCD12Q1.IGBP.SA.2002.msin.tif imap-best.vrt
+gdal_translate -co COMPRESS=DEFLATE -projwin -82.0 13.0 -34.0 -56.0  imap-best.vrt imap-best.tif
+makemaplevels.py imap-best.tif omap-best.tif
+
+#combine all in one script
+gdalwarp -of vrt -t_srs EPSG:4326 -tr 0.004 0.004 MCD12Q1.IGBP.SA.2002.msin.tif imap-004.vrt
+gdal_translate -co COMPRESS=DEFLATE -projwin -82.0 13.0 -34.0 -56.0  imap-004.vrt imap-004.tif
+makemaplevels.py imap-004.tif omap-004.tif 
+gdaladdo -ro -clean -r mode --config COMPRESS_OVERVIEW DEFLATE imap-004.tif  2 4 8 16 32 64 125 128 256
+gdaladdo -ro -clean -r average --config COMPRESS_OVERVIEW DEFLATE omap-004.tif  2 4 8 16 32 64 125 128 256
+
+gdaladdo -ro -clean -r mode --config COMPRESS_OVERVIEW DEFLATE imap-128.tif  2 4 8 16 32 64 128 256
+gdaladdo -ro -clean -r mode --config COMPRESS_OVERVIEW DEFLATE imap-best.tif  2 4 8 16 32 64 120 128 256
+
+gdaladdo -ro -clean -r average --config COMPRESS_OVERVIEW DEFLATE omap-128.tif  2 4 8 16 32 64 128 256
+gdaladdo -ro -clean -r average --config COMPRESS_OVERVIEW DEFLATE omap-best.tif  2 4 8 16 32 64 120 128 256
+#gdaladdo -ro -clean -r average --config COMPRESS_OVERVIEW DEFLATE omap-128.tif  64 128 256
+#gdaladdo -ro -clean -r average --config COMPRESS_OVERVIEW DEFLATE omap-best.tif 64 120 128 256
+
+#    gdal_translate -outsize 50% 50% omap-${suf}.tif omap-${suf}-50p.tif
+#    gdal_translate -outsize 25% 25% omap-${suf}.tif omap-${suf}-20p.tif
+#    gdal_translate -outsize 12.5% 12.5% omap-${suf}.tif omap-${suf}-125p.tif
+#    gdal_translate -outsize 6.25% 6.25% omap-${suf}.tif omap-${suf}-625p.tif
+
+for suf in 128 best 004; do
+    rm omap-${suf}-3125p.tif ; gdal_translate -outsize 3.125% 3.125% omap-${suf}.tif omap-${suf}-3125p.tif
+    rm omap-${suf}-15625p.tif ; gdal_translate -outsize 1.5625% 1.5625% omap-${suf}.tif omap-${suf}-15625p.tif
+    rm  omap-${suf}-05.tif ; gdal_translate -outsize 96 138 omap-${suf}.tif omap-${suf}-05.tif
+    rm  imap-${suf}-05.tif; gdal_translate -outsize 96 138 imap-${suf}.tif imap-${suf}-05.tif
+done
+
+
+#gdalwarp -of vrt -co COMPRESS=DEFLATE -t_srs EPSG:4326 -tr 0.00416666666666667 0.00416666666666667 MCD12Q1.IGBP.SA.2002.msin.tif imap-best.vrt
+#gdal_translate -co COMPRESS=DEFLATE -projwin -82.0 13.0 -34.0 -56.0  imap-128.vrt imap-128.tif
+#gdalwarp -of vrt -co COMPRESS=DEFLATE -t_srs EPSG:4326 -tr 0.00390625 0.00390625 MCD12Q1.IGBP.SA.2002.msin.tif imap-128.vrt
+#gdal_translate -co COMPRESS=DEFLATE -projwin -82.0 13.0 -34.0 -56.0  imap-best.vrt imap-best.tif
+#rm omap-best.tiff; time makemaplevels.py imap-best.tif omap-best.tif 
+#rm omap-128.tiff; time makemaplevels.py imap-128.tif omap-128.tif  
+

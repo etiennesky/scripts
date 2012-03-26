@@ -1,0 +1,57 @@
+#!/bin/bash
+
+source /home/tourigny/bin/functions
+
+function makemaplevels {
+
+    if [ $# -ne 3 ]
+    then
+	echo "Usage: $0 ifile ofile levels"
+	exit 1
+    fi
+    ifile=$1
+    ofile=$2
+    tmplevels=$3
+
+    echo "makemaplevels "$ifile" "$ofile" "$tmplevels
+
+####cleanup
+    rm -f tmpl_*.nc
+     [ -f $ifile".gz" ] && rm -f $ifile && gunzip -c $ifile".gz" >$ifile
+
+####separate vegtypes into different levels, with 100% coverage
+    for level in $mylevels
+    do  	  
+#	echo $level
+	cdo -b I8 setrtoc2,$level,$level,100,0 -setlevel,$level $ifile "tmpl_"$level".nc"
+    done
+
+####merge all levels into one file
+    rm -f $ofile
+#    nice cdo -f nc4 -z zip -b F32 -merge tmpl_*.nc $ofile 
+    nice cdo -f nc4 -z zip -b I8 -merge tmpl_*.nc $ofile 
+
+####cleanup
+    rm -f tmpl_*.nc
+    [ -f $ifile".gz" ] && rm -f $ifile
+#    gzip $ifile
+}
+
+function makemapregrid {
+
+    if [ $# -lt 3 ]
+    then
+	echo "Usage: $0 ifile gridfile resname <cdoopts>"
+	exit 1
+    fi
+    ifile=$1
+    gridfile=$2
+    resname=$3
+    cdoopts=$4
+    ofile=$(namename $ifile)"_"$resname""$(ext $ifile)
+
+    echo "makemapgrid "$ifile" "$gridfile" "$ofile
+ 
+    echo nice cdo $cdoopts -b F32 interpolate,$gridfile $ifile $ofile
+    nice cdo $cdoopts -b F32 interpolate,$gridfile $ifile $ofile
+}

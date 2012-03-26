@@ -1,0 +1,103 @@
+ogr2ogr -s_srs "EPSG:32723" -t_srs "EPSG:4326" Limites_lin2.shp Limites_lin.shp
+ogr2ogr -s_srs "EPSG:4326" -t_srs "EPSG:32723" bioma2.shp bioma.shp
+
+gdalwarp -s_srs "EPSG:32723" -t_srs "EPSG:4326" Vegetacao_GRT.asc Vegetacao_GRT2.tif
+gdal_merge.py  -ul_lr -47.05 -20.0 -46.35 -20.5 -o Vegetacao_GRT3.tif Vegetacao_GRT2.tif
+gdal_translate -a_nodata 0 -of AAIGrid  Vegetacao_GRT3.tif Vegetacao_GRT3.asc
+gdalwarp -s_srs "EPSG:32723" -t_srs "EPSG:4326" -tr 0.000277777784500 0.000277777784500 -srcnodata "-9999" -dstnodata 0 -overwrite  Vegetacao_GRT.asc test4.tif
+
+
+===
+#transform to WGS84, with resolution from Vegetacao_GRT.asc
+gdalwarp -s_srs "EPSG:32723" -t_srs "EPSG:4326" Vegetacao_GRT.asc Vegetacao_GRT2.tif
+gdal_merge.py  -ul_lr -47.05 -20.0 -46.35 -20.5 -o Vegetacao_GRT3.tif Vegetacao_GRT2.tif
+gdal_translate -of AAIgrid -a_nodata 0 Vegetacao_GRT3.tif Vegetacao_GRT3.asc
+
+gdalwarp -tr 0.000284526229472 0.000284526229472 -r bilinear -overwrite pnsc_topo_on.tif pnsc_topo_on3.tif
+gdal_translate  -of AAIGrid  -ot UInt16 pnsc_topo_on3.tif pnsc_topo_on3.asc
+
+#resize to -47.025 -20.05 -46.35 -20.35 
+rm -f Vegetacao_GRT2.tif Vegetacao_GRT3.tif Vegetacao_GRT3.asc
+gdalwarp -s_srs "EPSG:32723" -t_srs "EPSG:4326" Vegetacao_GRT.asc Vegetacao_GRT2.tif
+gdal_merge.py  -ul_lr -47.025 -20.05 -46.35 -20.35 -o Vegetacao_GRT3.tif Vegetacao_GRT2.tif
+gdal_translate -of AAIgrid -a_nodata 0 Vegetacao_GRT3.tif Vegetacao_GRT3.asc
+
+gdalwarp -tr 0.000284526229472 0.000284526229472 -r bilinear -overwrite pnsc_topo_on.tif pnsc_topo_on3.tif
+gdal_translate  -of AAIGrid  -ot UInt16 pnsc_topo_on3.tif pnsc_topo_on3.asc
+
+=== to 30m, wgs84 / utm zone 23S
+rm -f Vegetacao_GRT2.tif Vegetacao_GRT2.asc
+gdal_merge.py  -ul_lr 288207.419 7782415.368 359078.863 7748489.733 -n -9999 -init -9999 -o Vegetacao_GRT2.tif Vegetacao_GRT.asc
+ gdal_translate -of AAIgrid -a_nodata -9999  -a_srs "EPSG:32723"  Vegetacao_GRT2.tif Vegetacao_GRT2.asc
+
+rm -f tmp1.tif
+gdal_merge.py  -ul_lr 288207.419 7782415.368 359078.863 7748489.733 -n 0 -init 0 -o tmp1.tif jun07mai08-teste.tif
+gdal_translate -of AAIgrid -a_nodata  0 tmp1.tif jun07mai08-teste2.asc
+
+
+for f in cerrado_burned_area_????.tif; do echo $f;
+ gdalwarp -overwrite -dstnodata "0.0" -s_srs '+proj=sinu +R=6371007.181 +nadgrids=@null +wktext'  -t_srs EPSG:32723 $f $f-mod.tif; done;
+
+
+===
+latest
+cd year
+cp * . 
+gunzip *
+../process-modis-burn.sh
+R - source("test.R",print.eval=TRUE)
+readGDAL has offset and region to clip input dataset - useful!!! just need to calculate how much...
+ gdal_merge.py -ul_lr -47.05 -20.0 -46.35 -20.5 -o $ofile $ifile
+
+
+==
+gdal_merge2.py -v -o merge4.tif -n 0 -a_nodata 0 h*
+ gdalwarp -tr 463.312716527499902 463.312716527499902 -s_srs '+proj=sinu +R=6371007.181 +nadgrids=@null +wktext' -t_srs "EPSG:32723" HDF4_EOS:EOS_GRID:"MCD45A1.A2002001.h12v10.005.2007133111931.hdf":MOD_GRID_Monthly_500km_BA:burndate p9.tif
+
+ gdalwarp -tr 463.312716527499902 463.312716527499902 -s_srs '+proj=sinu +R=6371007.181 +nadgrids=@null +wktext' -t_srs " +proj=utm +zone=23 +south +ellps=WGS84 +datum=WGS84 +units=m +no_defs" HDF4_EOS:EOS_GRID:"MCD45A1.A2002001.h12v10.005.2007133111931.hdf":MOD_GRID_Monthly_500km_BA:burndate utm23-1.tif
+
+
+
+for f in jun*.png ; do echo $f ; convert $f -crop 1110x550+50+125 ../landsat/$f; done
+
+====themes
+THEMACLASS
+Cerrado_ss	1	18
+Veg_Umida	2	20
+Marrom_rocha	3	40
+Branco_agri	4	40
+campo_rupestre	5	16
+campo_sujo1	6	16
+campo_sujo2	7	16
+2009		8	-1
+2010		9	-1
+
+14	CER_IG	15.9	0	0	2.1	0	static	57	39	39	70	25	23.3	18.6	Invasive grasses
+15	CER_CL	5.5	0	0	0.4	0	static	90	39	39	50	25	17.2	16.3	Campo limpo
+16	CER_CS	3.5	0	0	0.2	0.2	static	90	39	39	50	25	17.2	16.3	Campo sujo
+17	CER_CC	2.9	0.7	0.4	0.1	2.9	static	90	39	39	50	25	17.2	16.3	Campo cerrado
+18	CER_CSS	2.9	0.8	0.9	0.1	2.8	static	90	39	39	50	25	17.2	16.3	Cerrado sensu stricto
+19	CER_CDA	2.9	2.1	3.4	0.1	3.1	static	90	39	39	30	25	17.2	16.3	Cerradao
+20	CER_MC	3.8	3.1	5.5	0.6	3.9	static	90	39	39	30	25	17.2	16.3	Mata ciliar
+21	CER_MU	1.5	0.1	0.1	1.4	0.7	static	90	39	39	30	25	17.2	16.3	Murundu
+22	CER_BM	0.7	0	0	2.3	0.1	static	90	40	40	40	20	17.2	16.3	Brejo-murundu
+23	CER_BV	0.7	0	0	3	0	static	90	41	41	40	20	17.2	16.3	Brejo-veredas
+24	CER_EP	2.9	1.3	0.67	0.1	1.7	static	91	42	42	50	25	19.5	17	Eucalyptus plantation
+99	UNBURN	0	0	0	0	0	static	90	39	39	0	25	17.2	16.3	Unburnable
+
+indexes_i=" 
+
+val_repl.py -in 0 -in2 367 -out 1 -c lg MCD45.pnsc.burndate.jun2010-dec2010.tif tmp11.tif
+
+===
+confusion matrix
+t1=readGDAL("TM.pnsc-clip.jun10_mai11.tif")
+c1=readGDAL("MCD45.pnsc-clip.burnpix.jun2010-dec2010.tif")
+c1d=c1@data[,1]
+t1d=t1@data[,1]
+tab1=table(c1d,t1d)
+summary(tab1)
+tab1/sum(tab1[,2])*100
+
+--- need to compute basic stats (specific and global accuracy, com+ommi. errors)
+and kappa

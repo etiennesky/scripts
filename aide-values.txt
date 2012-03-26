@@ -1,0 +1,32 @@
+==== MODIS
+
+MODIS 500m CHARACTERISTICBINSIZE=463.312716527778
+
+ρ=6371007.181 m
+
+-tr 463.312716527778 463.312716527778
+250m -> 231.656358264
+500m -> 463.312716527778
+1000m -> 926.625433056
+
+===l3jrc dims
+gdal_translate -projwin -82.1 13.1 -33.9 -55.55 -co "COMPRESS=DEFLATE" l3jrc.2000.tif l3jrc.sam.2000.tif
+
+
+====EPSG
+4326 - WGS 84
+4618 - SAD69 (GCS_South_American_1969)
+
+32722 - WGS 84 / UTM zone 22S
+29182 - SAD69 / UTM zone 22S
+32622 - WGS 84 / UTM zone 22N
+3410 - NSIDC EASE-Grid Global
+29101 - SAD69 / Brazil Polyconic 
++proj=poly +lat_0=0 +lon_0=-54 +x_0=5000000 +y_0=10000000 +ellps=aust_SA +units=m +no_defs
++proj=poly +lat_0=0 +lon_0=-54 +x_0=0 +y_0=0 +ellps=aust_SA +units=m +no_defs
+
+====EPSG - which
+4618 - ECMBio UCs
+
+====proj
+MODIS:  -s_srs '+proj=sinu +R=6371007.181 +nadgrids=@null +wktext'
