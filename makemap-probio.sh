@@ -13,6 +13,9 @@ function do_make {
     if [[ "$do_rasterize" == "1" ]]; then
         do_rasterize
     fi
+    if [[ "$do_rasterize2" == "1" ]]; then
+        do_rasterize2
+    fi
     if [[ "$do_mosaic" == "1" ]]; then
         do_mosaic
     fi
@@ -62,8 +65,26 @@ function do_rasterize {
             done
             wait
             
-            if (( ${#res1[*]} > 1 )); then
-                gdaladdo -ro -clean -r mode --config COMPRESS_OVERVIEW DEFLATE ${biome[$i_biome]}_${name2[$i_name]}_${res2[$i_res]}${proj}.tif 2 4
+        done
+        echo "done ==" 
+        wait
+    done
+}
+    
+function do_rasterize2 {
+    echo "do_rasterize2" ${#biome[*]}  ${#res1[*]}   ${#name1[*]}
+    for (( i_biome = 0 ; i_biome < ${#biome[*]} ; i_biome++ )) ; do
+        echo "=== biome: " ${biome[$i_biome]}
+        echo $name1
+        echo $res1
+        for (( i_name = 0 ; i_name < ${#name1[*]} ; i_name++ )) ; do
+            
+            #ofile=${biome[$i_biome]}_${name2[$i_name]}_${res0}.tif
+            #echo nice gdal_rasterize -a_nodata $nodata -init $nodata -tr $res0 $res0 -tap -co compress=DEFLATE -a ${name1[$i_name]} -l ${biome[$i_biome]} ${biome[$i_biome]}.shp $ofile 
+            #nice gdal_rasterize -a_nodata $nodata -init $nodata -tr $res0 $res0 -tap -co compress=DEFLATE -a ${name1[$i_name]} -l ${biome[$i_biome]} ${biome[$i_biome]}.shp $ofile &
+                
+            if (( ${#res2[*]} > 1 )); then
+                gdaladdo -ro -clean -r mode --config COMPRESS_OVERVIEW DEFLATE ${biome[$i_biome]}_${name2[$i_name]}_${res2[$i_res]}${proj}.tif $addo_levs
                 rm -f ${biome[$i_biome]}_${name2[$i_name]}_${res2[1]}${proj}.tif 
                 gdal_translate ${co_opt[1]} -outsize 25% 25% ${biome[$i_biome]}_${name2[$i_name]}_${res2[0]}${proj}.tif ${biome[$i_biome]}_${name2[$i_name]}_${res2[1]}${proj}.tif 
                 rm -f ${biome[$i_biome]}_${name2[$i_name]}_${res2[2]}${proj}.tif 
@@ -115,7 +136,7 @@ mprefix="RADAM"
 #res1=( "0.1" )
 #res2=( "0p1d" )
 #co_opt=("-co compress=DEFLATE" )
-res0=1
+##res0=1
 #res1=( "0.01" )
 #res2=( "0p01d" )
 #res1=( "0.00416666666666667" )
@@ -123,14 +144,19 @@ res0=1
 #res1=( "0.001041667" "0.0041666667" )
 res1=( "0.001041667" )
 res2=( "125m" "250m" "500m" )
+#res1=( "0.0002702703" )
+#res2=( "30m" )
 #res1=( "0.0041666667" )
 #res2=( "500m" )
+
 co_opt=("-co compress=DEFLATE" "-co compress=DEFLATE"  "-co compress=DEFLATE" )
 name1=( ID_INLAND )
 name2=( INLAND )
 #name1=( ID_DOMI )
 #name2=( AMALEGAL )
-biome=( amalegal_completo )
+#biome=( amalegal_completo )
+##biome=( clip1 clip2 clip3 clip4 )
+#biome=( clip1 )
 #biome=( amalegal_antropicas amalegal_vegetacao Tensao_vegetacao )
 #proj=wgs84
 proj="_wgs84"
@@ -138,12 +164,39 @@ proj="_wgs84"
 #proj_s_srs="-s_srs EPSG:4618"
 proj_s_srs=""
 proj_t_srs="-t_srs EPSG:4326"
+addo_levs="2 4"
 
+#ogr2ogr -clipsrc -73.991548  -18.041912 -59  -6  clip1.shp ../amalegal_completo_wgs84.shp amalegal_completo_wgs84 &
+#ogr2ogr -clipsrc -59  -18.041912 -44.000350  -6  clip2.shp ../amalegal_completo_wgs84.shp amalegal_completo_wgs84
+
+##biome=( clip1 clip2 clip3 clip4 )
+biome=( clip1 )
+res1=( "0.001041667" )
+res2=( "125m" )
 do_replace=0
 do_reproject=0
 do_rasterize=1
+do_rasterize2=0
 do_mosaic=0
+
+#do_make
+
+biome=( amalegal_completo )
+res1=( "0.001041667" )
+res2=( "125m" "250m" "500m" )
+do_replace=0
+do_reproject=0
+do_rasterize=0
+do_rasterize2=1
+do_mosaic=0
+
+if [[ "$do_rasterize2" == "1" ]]; then
+    rm -f tmp1.vrt ${biome[0]}_${name2[0]}_${res2[0]}${proj}.tif
+    gdalbuildvrt tmp1.vrt clip*_${name2[0]}_${res2[0]}${proj}.tif
+    gdal_translate -co compress=DEFLATE tmp1.vrt ${biome[0]}_${name2[0]}_${res2[0]}${proj}.tif
+fi
 do_make
+
 }
 
 
@@ -155,7 +208,7 @@ mprefix="PRODES"
 res1=( "0.1" )
 res2=( "0p1d" )
 #co_opt=("-co compress=DEFLATE" )
-res0=1
+##res0=1
 #res1=( "0.01" )
 #res2=( "0p01d" )
 #res1=( "0.00416666666666667" )
