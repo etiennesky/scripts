@@ -168,7 +168,9 @@ addo_levs="2 4"
 
 #ogr2ogr -clipsrc -73.991548  -18.041912 -59  -6  clip1.shp ../amalegal_completo_wgs84.shp amalegal_completo_wgs84 &
 #ogr2ogr -clipsrc -59  -18.041912 -44.000350  -6  clip2.shp ../amalegal_completo_wgs84.shp amalegal_completo_wgs84
-
+#ogr2ogr -clipsrc -73.991548  -6 -59   5.271810  clip3.shp ../amalegal_completo_wgs84.shp amalegal_completo_wgs84 &
+#ogr2ogr -clipsrc -59  -6 -44.000350   5.271810  clip4.shp ../amalegal_completo_wgs84.shp amalegal_completo_wgs84
+ 
 ##biome=( clip1 clip2 clip3 clip4 )
 biome=( clip1 )
 res1=( "0.001041667" )
