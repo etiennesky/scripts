@@ -58,7 +58,7 @@ function do_rasterize {
                     ofile=${biome[$i_biome]}_${name2[$i_name]}_${res2[$i_res]}${proj}.tif
                     rm -f $ofile tmp-$ofile
                     echo gdal_rasterize -a_nodata $nodata -init $nodata -tr ${res1[$i_res]} ${res1[$i_res]} -tap -a ${name1[$i_name]} -l ${biome[$i_biome]}${proj} ${biome[$i_biome]}${proj}.shp $ofile
-                    nice gdal_rasterize -a_nodata $nodata -init $nodata -tr ${res1[$i_res]} ${res1[$i_res]} -tap -a ${name1[$i_name]} -l ${biome[$i_biome]}${proj} ${biome[$i_biome]}${proj}.shp tmp-$ofile 
+                    time nice gdal_rasterize -a_nodata $nodata -init $nodata -tr ${res1[$i_res]} ${res1[$i_res]} -tap -a ${name1[$i_name]} -l ${biome[$i_biome]}${proj} ${biome[$i_biome]}${proj}.shp tmp-$ofile 
                     nice gdal_translate ${co_opt[$i_res]} tmp-$ofile $ofile
                     rm tmp-$ofile
 #            gdal_rasterize -a_nodata 0 -init 0 -tr ${res1[$i_res]} ${res1[$i_res]} ${co_opt[$i_res]} -a ${name1[$i_name]} -l ${biome[$i_biome]} ${biome[$i_biome]}.shp $ofile 
@@ -86,9 +86,9 @@ function do_rasterize2 {
             if (( ${#res2[*]} > 1 )); then
                 gdaladdo -ro -clean -r mode --config COMPRESS_OVERVIEW DEFLATE ${biome[$i_biome]}_${name2[$i_name]}_${res2[$i_res]}${proj}.tif $addo_levs
                 rm -f ${biome[$i_biome]}_${name2[$i_name]}_${res2[1]}${proj}.tif 
-                gdal_translate ${co_opt[1]} -outsize 25% 25% ${biome[$i_biome]}_${name2[$i_name]}_${res2[0]}${proj}.tif ${biome[$i_biome]}_${name2[$i_name]}_${res2[1]}${proj}.tif 
+                gdal_translate ${co_opt[1]} ${outsize[0]} ${biome[$i_biome]}_${name2[$i_name]}_${res2[0]}${proj}.tif ${biome[$i_biome]}_${name2[$i_name]}_${res2[1]}${proj}.tif 
                 rm -f ${biome[$i_biome]}_${name2[$i_name]}_${res2[2]}${proj}.tif 
-                gdal_translate ${co_opt[1]} -outsize 12.5% 12.5% ${biome[$i_biome]}_${name2[$i_name]}_${res2[0]}${proj}.tif ${biome[$i_biome]}_${name2[$i_name]}_${res2[2]}${proj}.tif 
+                gdal_translate ${co_opt[1]}  ${outsize[1]} ${biome[$i_biome]}_${name2[$i_name]}_${res2[0]}${proj}.tif ${biome[$i_biome]}_${name2[$i_name]}_${res2[2]}${proj}.tif 
             fi
         done
         echo "done ==" 
@@ -142,10 +142,8 @@ mprefix="RADAM"
 #res1=( "0.00416666666666667" )
 #res2=( "500m" )
 #res1=( "0.001041667" "0.0041666667" )
-res1=( "0.001041667" )
-res2=( "125m" "250m" "500m" )
-#res1=( "0.0002702703" )
-#res2=( "30m" )
+##res1=( "0.001041667" )
+##res2=( "125m" "250m" "500m" )
 #res1=( "0.0041666667" )
 #res2=( "500m" )
 
@@ -172,24 +170,31 @@ addo_levs="2 4"
 #ogr2ogr -clipsrc -59  -6 -44.000350   5.271810  clip4.shp ../amalegal_completo_wgs84.shp amalegal_completo_wgs84
  
 ##biome=( clip1 clip2 clip3 clip4 )
-biome=( clip1 )
-res1=( "0.001041667" )
-res2=( "125m" )
+biome=( clip2 clip3 clip4 )
+#biome=( clip1 )
+#res1=( "0.001041667" )
+#res2=( "125m" )
+res1=(
+ "0.0002604167" )
+res2=( "30m" "250m" "500m" )
+outsize=( "12.5% 12.5%" "6.25% 6.25%" )
+addo_levs="2 4 8 16"
 do_replace=0
 do_reproject=0
 do_rasterize=1
 do_rasterize2=0
 do_mosaic=0
 
-#do_make
+do_make
 
 biome=( amalegal_completo )
-res1=( "0.001041667" )
-res2=( "125m" "250m" "500m" )
+##res1=( "0.001041667" )
+##res2=( "125m" "250m" "500m" )
 do_replace=0
 do_reproject=0
 do_rasterize=0
-do_rasterize2=1
+#do_rasterize2=1
+do_rasterize2=0
 do_mosaic=0
 
 if [[ "$do_rasterize2" == "1" ]]; then
@@ -197,7 +202,7 @@ if [[ "$do_rasterize2" == "1" ]]; then
     gdalbuildvrt tmp1.vrt clip*_${name2[0]}_${res2[0]}${proj}.tif
     gdal_translate -co compress=DEFLATE tmp1.vrt ${biome[0]}_${name2[0]}_${res2[0]}${proj}.tif
 fi
-do_make
+#do_make
 
 }
 
