@@ -1,5 +1,5 @@
 #!/bin/bash
-source /data/docs/research/bin/functions
+source functions
 
 #set -x 
 

@@ -16,12 +16,13 @@ sub get_modis {
     my @remote_files;
     my @filtered_files1;
     my @filtered_files2;
+    my @filtered_files3;
     my $tmp_file2 = "";
     my $tmp_size = 0;
     my $tmp_size2 = 0;
     my $tmp_size3 = 0;
 #    my (@ftp_config, @years,@months,@days,$indexes_hv) = @_;
-    my ($ftp_config, $_years,$_months,$_days,$indexes_hv,$suffixes,$ofile_prefix) = @_;
+    my ($ftp_config, $_years,$_months,$_days,$indexes_hv,$suffixes,$prefixes,$ofile_prefix) = @_;
     my @years=@{$_years};
     my @months=@{$_months};
     my @days=@{$_days};
@@ -31,9 +32,9 @@ sub get_modis {
     my $ftp_user = @{$ftp_config}[2];
     my $ftp_password = @{$ftp_config}[3];
 
-    my $ofile_config = "$ofile_prefix-config.txt";
-    my $ofile_ncftp = "$ofile_prefix-ncftp.txt";
-    my $ofile_ftp = "$ofile_prefix-ftp.txt";
+    my $ofile_config = "${ofile_prefix}-config.txt";
+    my $ofile_ncftp = "${ofile_prefix}-ncftp.txt";
+    my $ofile_ftp = "${ofile_prefix}-ftp.txt";
     
     print "ftp: @${ftp_config}\n";
     print "years: @years\n";
@@ -41,6 +42,7 @@ sub get_modis {
     print "days: @days\n";
     print "hv: $indexes_hv\n";
     print "suffixes: $suffixes\n";
+    print "prefixes: $prefixes\n";
 
 
 #    die "";
@@ -70,6 +72,7 @@ open(OFILE_NCFTP,">$ofile_ncftp") || die("Cannot Open File $ofile_ncftp");
     print OFILE_CONFIG "#days: @days\n";
     print OFILE_CONFIG "#hv: $indexes_hv\n";
     print OFILE_CONFIG "#suffixes: $suffixes\n";
+    print OFILE_CONFIG "#prefixes: $prefixes\n";
 
 #print "Now in dir $ftp_dir\n";
 
@@ -82,24 +85,39 @@ foreach my $year (@years) {
 #    mkdir ("$year");
 #    chdir ("$year");
     
-#    print "year |$year|\n";
+    print "year |$year|\n";
     foreach my $_month (@months) {
 	my $month = sprintf("%02d",$_month);
-#	print "month |$month|\n";
+	print "month |$month|\n";
 	foreach my $_day (@days) {
 	    my $day = sprintf("%02d",$_day);
 	    my $tmp_dir = "$year.$month.$day";
-	    @remote_files = $ftp->ls($tmp_dir);
+#	    my $tmp_dir = "Browse.001";
+        print "day |$day|\n";
+        print "tmp_dir |$tmp_dir|\n";
+        $ftp->cwd($tmp_dir);
+        print "pwd: ".$ftp->pwd()."\n";
+#	    @remote_files = $ftp->ls($tmp_dir);
+#	    @remote_files = $ftp->dir();
+#	    @remote_files = $ftp->ls("2010.10.05");
+	    @remote_files = $ftp->ls();
+        $ftp->cwd("..");
         if ( $indexes_hv eq "*" ) {
             @filtered_files1 = @remote_files;
         }
         else {
             @filtered_files1 = grep (/$indexes_hv/, @remote_files);
         }
-	    @filtered_files2 = grep (/\.$suffixes$/, @filtered_files1);
-#	    print "remote_files: @remote_files\n";
-#	    print "filtred_files1: @filtered_files1\n";
-#	    print "filtred_files2: @filtered_files2\n";
+#	    @filtered_files2 = grep (/\.$suffixes$/, @filtered_files1);
+	    @filtered_files2 = grep (/$suffixes$/, @filtered_files1);
+#        if ( $prefixes ne "" ) {
+#            @filtered_files3 = grep (/^$prefixes/, @filtered_files2);
+#        }
+#	    print "remote_files1: ".$ftp->ls()."\n";
+	    ##print "remote_files: @remote_files\n";
+	    ##print "filtred_files1: @filtered_files1\n";
+	    ##print "filtred_files2: @filtered_files2\n";
+	    ##print "filtred_files3: @filtered_files3\n";
 	    foreach my $tmp_file (@filtered_files2) {
 #		    print "get MODIS_Dailies_B/MOLT/MOD09GQ.005/2011.08.01/MOD09GQ.A2011213.h13v10.005.2011215053310.hdf MOD09GQ.A2011213.h13v10.005.2011215053310.hdf
 #		print "get -c $ftp_dir/$tmp_file\n";

@@ -120,3 +120,30 @@ ogr2ogr -clipdst -74.500000000001 5.500000000001 -34.499999999999 -34.0000000000
 
 == get terraclass
  wget -r -l 4 --no-parent -c -nc -nd -A "_shp.zip" http://quiririm.dmz.inpe.br/cra/Dados_web/ACRE/
+
+
+== prepare file for confusion matrix
+ 2127  rm 250-80.tif ; gdal_translate -projwin -55.9499406096 -13.6902562019 -55.8131333493 -13.8474390904 cerrado_INLAND_250m-80_wgs84.tif 250-80.tif
+ 2128  rm 250-80-30.tif ;  gdalwarp -tr 0.000260416666667 0.000260416666667 250-80.tif 250-80-30.tif
+ 2129  rm 250-80-30-2.tif ; gdal_translate -projwin -55.949999954522227 -13.690104168466981 -55.813281204522227 -13.845833335133827 250-80-30.tif 250-80-30-2.tif
+
+
+ rm 30.tif ; gdal_translate -projwin  -56.7557995484 -13.2447992929 -55.0177967995 -14.2493118306 cerrado_INLAND_30m_wgs84.tif 30.tif
+rm 30-2.tif ; gdal_translate -projwin -56.755989537855562 -13.244791668466981 -55.018749954522271 -14.247916668466889 30.tif 30-2.tif
+
+ rm 250-60.tif ; gdal_translate -projwin  -56.7557995484 -13.2447992929 -55.0177967995 -14.2493118306 cerrado_INLAND_250m-60_wgs84.tif 250-60.tif
+rm 250-60-30.tif ;  gdalwarp -tr 0.000260416666667 0.000260416666667 -dstnodata 100 250-60.tif 250-60-30.tif
+rm 250-60-30-2.tif ; gdal_translate -projwin -56.755989537855562 -13.244791668466981 -55.018749954522271 -14.247916668466889 250-60-30.tif 250-60-30-2.tif
+ 
+ rm 250-30.tif ; gdal_translate -projwin  -56.7557995484 -13.2447992929 -55.0177967995 -14.2493118306 cerrado_INLAND_250m-30_wgs84.tif 250-30.tif
+rm 250-30-30.tif ;  gdalwarp -tr 0.000260416666667 0.000260416666667 -dstnodata 100 250-30.tif 250-30-30.tif
+rm 250-30-30-2.tif ; gdal_translate -projwin -56.755989537855562 -13.244791668466981 -55.018749954522271 -14.247916668466889 250-30-30.tif 250-30-30-2.tif
+
+r30 = myErrReport("250-30-30-2.tif", "30-2.tif", levels=c(0,1,2,9,20,22))
+r60 = myErrReport("250-60-30-2.tif", "30-2.tif", levels=c(0,1,2,9,20,22))
+r80 = myErrReport("250-80-30-2.tif", "30-2.tif", levels=c(0,1,2,9,20,22))
+
+
+#get mod09 browse files
+for yy in 2010; do for mm in "09" "10"; do for dd in `seq -w 1 31`; do echo ==========================================; echo $yy.$mm.$dd;  wget -nd -nc -nv -r -A BROWSE.MOD09GA*h13v10*,BROWSE.MOD09GA*h13v09*,BROWSE.MOD09GA*h12v10*,BROWSE.MOD09GA*h12v09*,BROWSE.MOD09GA*h11v09* ftp://e4ftl01.cr.usgs.gov/WORKING/BRWS/Browse.001/$yy.$mm.$dd/ ;    done;done;done
+for yy in 2010 2009 ; do for mm in "09" "10"; do for dd in `seq -w 1 31`; do echo ==========================================; echo $yy.$mm.$dd;  wget -nd -nc -nv -r -A BROWSE.MOD09A1*h13v10*,BROWSE.MOD09A1*h13v09*,BROWSE.MOD09A1*h12v10*,BROWSE.MOD09A1*h12v09*,BROWSE.MOD09A1*h11v09* ftp://e4ftl01.cr.usgs.gov/WORKING/BRWS/Browse.001/$yy.$mm.$dd/ ;    done;done;done

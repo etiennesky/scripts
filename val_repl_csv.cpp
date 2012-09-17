@@ -57,35 +57,8 @@ static void Usage()
 {
     int	iDr;
         
-    printf( "Usage: gdal_translate [--help-general]\n"
-            "       [-ot {Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/\n"
-            "             CInt16/CInt32/CFloat32/CFloat64}] [-strict]\n"
-            "       [-of format] [-b band] [-mask band] [-expand {gray|rgb|rgba}]\n"
-            "       [-outsize xsize[%%] ysize[%%]]\n"
-            "       [-unscale] [-scale [src_min src_max [dst_min dst_max]]]\n"
-            "       [-srcwin xoff yoff xsize ysize] [-projwin ulx uly lrx lry]\n"
-            "       [-a_srs srs_def] [-a_ullr ulx uly lrx lry] [-a_nodata value]\n"
-            "       [-gcp pixel line easting northing [elevation]]*\n" 
-            "       [-mo \"META-TAG=VALUE\"]* [-q] [-sds]\n"
-            "       [-co \"NAME=VALUE\"]* [-stats]\n"
-            "       [-replace_ids file.csv id_from id_to\n"
-            "       src_dataset dst_dataset\n\n" );
+    printf( "Usage: val_repl_csv -replace_ids file.csv fieldFrom fieldTo src_dataset dst_dataset\n\n" );
 
-    printf( "%s\n\n", GDALVersionInfo( "--version" ) );
-    printf( "The following format drivers are configured and support output:\n" );
-    for( iDr = 0; iDr < GDALGetDriverCount(); iDr++ )
-    {
-        GDALDriverH hDriver = GDALGetDriver(iDr);
-        
-        if( GDALGetMetadataItem( hDriver, GDAL_DCAP_CREATE, NULL ) != NULL
-            || GDALGetMetadataItem( hDriver, GDAL_DCAP_CREATECOPY,
-                                    NULL ) != NULL )
-        {
-            printf( "  %s: %s\n",
-                    GDALGetDriverShortName( hDriver ),
-                    GDALGetDriverLongName( hDriver ) );
-        }
-    }
 }
 
 /************************************************************************/
@@ -413,7 +386,6 @@ static int ProxyMain( int argc, char ** argv )
 	 // if (0)
     for( i = 1; i < nRasterCount+1; i++ )
     {
-      printf("TMP ET band %d\n",i);
       inBand = hDataset->GetRasterBand( i ); 
       // hOutDS->AddBand(GDT_Byte);
       outBand = hOutDS->GetRasterBand( i );      
@@ -450,12 +422,14 @@ static int ProxyMain( int argc, char ** argv )
       srcBuffer = (GByte *) CPLMalloc(nXBlockSize * nYBlockSize);
 
       for( iYBlock = 0; iYBlock < nYBlocks; iYBlock++ )
-	{
+      {
 	  // if(iYBlock%1000 == 0)
-	    printf("iXBlock: %d iYBlock: %d\n",iXBlock,iYBlock);
-	  for( iXBlock = 0; iXBlock < nXBlocks; iXBlock++ )
-	    {
-	      int        nXValid, nYValid;
+	    // printf("iXBlock: %d iYBlock: %d\n",iXBlock,iYBlock);
+          if(iYBlock%1000 == 0)
+              printf("iYBlock: %d / %d\n",iYBlock,nYBlocks);
+          for( iXBlock = 0; iXBlock < nXBlocks; iXBlock++ )
+          {
+              int        nXValid, nYValid;
 	      
 	      // inBand->ReadBlock( iXBlock, iYBlock, srcBuffer );
 	      inBand->RasterIO( GF_Read,  iXBlock, iYBlock, nXBlockSize, nYBlockSize, 

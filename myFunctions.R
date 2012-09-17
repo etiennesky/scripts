@@ -1,6 +1,9 @@
+
+library("rgdal")
+
+
 #=========================
 #taken from vcd package
-
 myKappa <- function (x, weights = c("Equal-Spacing", "Fleiss-Cohen"))
 {
   if (is.character(weights))
@@ -12,6 +15,8 @@ myKappa <- function (x, weights = c("Equal-Spacing", "Fleiss-Cohen"))
   colFreqs <- colSums(x)/n
   rowFreqs <- rowSums(x)/n
   
+print(colFreqs)
+print(rowFreqs)
   ## Kappa
   kappa <- function (po, pc)
     (po - pc) / (1 - pc)
@@ -70,6 +75,7 @@ myConfMatrix <- function (classif, ref, levels=NULL) {
     ref <- factor(ref,levels=levels)
   }
   x <- table(classif,ref)
+#print(x)
 #  x <- x + 1
   x2 <- addmargins(x)
   k <- myKappa(x)
@@ -102,18 +108,21 @@ myConfMatrix <- function (classif, ref, levels=NULL) {
 }
 
 #myErrReport <- function (r_cla, r_ref) {
-myErrReport <- function (f_cla, f_ref) {
+myErrReport <- function (f_cla, f_ref, levels=NULL) {
 
   r_cla <- readGDAL(f_cla)
   r_ref <- readGDAL(f_ref)
 
+#print(r_cla@data[,1])
+#print(r_ref@data[,1])
 #  cm <- myConfMatrix(classif,ref,levels)
-  cm <- myConfMatrix(r_cla@data[,1],r_ref@data[,1],levels=0:1)
+#  cm <- myConfMatrix(r_cla@data[,1],r_ref@data[,1],levels=0:1)
+  cm <- myConfMatrix(r_cla@data[,1],r_ref@data[,1])
 #  k <- myKappa(cm$cm)
   
 #  str(cm)
 #  print(rbind(cm))
-#  print(cm$cm)
+#  print(cm)
 #  str(k)
 #  print(k)
   factor <- r_cla@grid@cellsize[1]*r_cla@grid@cellsize[2]/1000/1000

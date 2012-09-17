@@ -27,6 +27,13 @@ function do_replace {
     echo "do_replace" ${#area[*]}  ${#res1[*]}   ${#name1[*]}
     for (( i_area = 0 ; i_area < ${#area[*]} ; i_area++ )) ; do      
         echo "=== area: " ${area[$i_area]}
+        ogr-replace-values.py  ${area[$i_area]}.shp ${csv_file}
+    done
+}        
+function do_replace2 {
+    echo "do_replace2" ${#area[*]}  ${#res1[*]}   ${#name1[*]}
+    for (( i_area = 0 ; i_area < ${#area[*]} ; i_area++ )) ; do      
+        echo "=== area: " ${area[$i_area]}
         ogr-replace-values2.py  ${area[$i_area]}.shp ${csv_file}
     done
 }        
@@ -36,9 +43,10 @@ function do_reproject {
     for (( i_area = 0 ; i_area < ${#area[*]} ; i_area++ )) ; do
         echo "=== area: " ${area[$i_area]}
         rm -f ${area[$i_area]}${proj}.*
+        ogrinfo -sql "CREATE SPATIAL INDEX ON ${area[$i_area]}" ${area[$i_area]}.shp
         echo ogr2ogr $proj_s_srs $proj_t_srs ${area[$i_area]}${proj}.shp ${area[$i_area]}.shp ${area[$i_area]}
         ogr2ogr $proj_s_srs $proj_t_srs ${area[$i_area]}${proj}.shp ${area[$i_area]}.shp ${area[$i_area]}
-        
+        ogrinfo -sql "CREATE SPATIAL INDEX ON ${area[$i_area]}${proj}" ${area[$i_area]}${proj}.shp       
     done
 }        
 
@@ -60,9 +68,10 @@ function do_rasterize {
                     ofile=${area[$i_area]}_${name2[$i_name]}_${res2[$i_res]}${proj}.tif
                     rm -f $ofile* #tmp-$ofile
 #                    echo gdal_rasterize -ot Byte -a_nodata $nodata -init $nodata -tr ${res1[$i_res]} ${res1[$i_res]} -tap -a ${name1[$i_name]} -l ${area[$i_area]}${proj} ${area[$i_area]}${proj}.shp $ofile
-#                    time nice gdal_rasterize -ot Byte -a_nodata $nodata -init $nodata -tr ${res1[$i_res]} ${res1[$i_res]} -tap -a ${name1[$i_name]} -l ${area[$i_area]}${proj} ${area[$i_area]}${proj}.shp tmp-$ofile 
-                    echo time nice gdal_rasterize ${co_opt[$i_res]} -ot Byte -a_nodata $nodata -init $nodata -tr ${res1[$i_res]} ${res1[$i_res]} -te $extent -a ${name1[$i_name]} -l ${area[$i_area]}${proj} ${area[$i_area]}${proj}.shp $ofile
-                    time nice gdal_rasterize ${co_opt[$i_res]} -ot Byte -a_nodata $nodata -init $nodata -tr ${res1[$i_res]} ${res1[$i_res]} -te $extent -a ${name1[$i_name]} -l ${area[$i_area]}${proj} ${area[$i_area]}${proj}.shp $ofile
+#                    time nice gdal_rasterize -ot Byte -a_nodata $nodata -init $nodata -tr ${res1[$i_res]} ${res1[$i_res]} -tap -a ${name1[$i_name]} -l ${area[$i_area]}${proj} ${area[$i_area]}${proj}.shp tmp-$ofile
+ 
+                    echo time nice gdal_rasterize ${co_opt[$i_res]} -ot Byte -a_nodata $nodata -init $nodata -tr ${res1[$i_res]} ${res1[$i_res]} $extent -a ${name1[$i_name]} -l ${area[$i_area]}${proj} ${area[$i_area]}${proj}.shp $ofile
+                    time nice gdal_rasterize ${co_opt[$i_res]} -ot Byte -a_nodata $nodata -init $nodata -tr ${res1[$i_res]} ${res1[$i_res]} $extent -a ${name1[$i_name]} -l ${area[$i_area]}${proj} ${area[$i_area]}${proj}.shp $ofile
 #                    nice gdal_translate ${co_opt[$i_res]} tmp-$ofile $ofile
 #                    rm tmp-$ofile
 #            gdal_rasterize -a_nodata 0 -init 0 -tr ${res1[$i_res]} ${res1[$i_res]} ${co_opt[$i_res]} -a ${name1[$i_name]} -l ${area[$i_area]} ${area[$i_area]}.shp $ofile 
@@ -87,8 +96,8 @@ function do_rasterize2 {
             #nice gdal_rasterize -a_nodata $nodata -init $nodata -tr $res0 $res0 -tap -co compress=DEFLATE -a ${name1[$i_name]} -l ${area[$i_area]} ${area[$i_area]}.shp $ofile &
                 
             if (( ${#res2[*]} > 1 )); then
-                rm -f ${area[$i_area]}_${name2[$i_name]}_${res2[$i_res]}${proj}.tif.*
-                gdaladdo -ro -clean -r mode --config COMPRESS_OVERVIEW DEFLATE ${area[$i_area]}_${name2[$i_name]}_${res2[$i_res]}${proj}.tif $addo_levs
+                rm -f ${area[$i_area]}_${name2[$i_name]}_${res2[0]}${proj}.tif.*
+                gdaladdo -ro -clean -r mode --config COMPRESS_OVERVIEW DEFLATE ${area[$i_area]}_${name2[$i_name]}_${res2[0]}${proj}.tif $addo_levs
                 rm -f ${area[$i_area]}_${name2[$i_name]}_${res2[1]}${proj}.tif* 
                 gdal_translate ${co_opt[1]} -outsize ${outsize[0]} ${area[$i_area]}_${name2[$i_name]}_${res2[0]}${proj}.tif ${area[$i_area]}_${name2[$i_name]}_${res2[1]}${proj}.tif 
             fi
@@ -148,4 +157,80 @@ function do_mosaic {
         wait
 #    done
 }
+
+
+
+##old stuff
+
+## ibama
+
+#res1=( 0.000520833333333 )
+#res2=( "60m" )
+#res1=( 0.000260416666666667 )
+#res2=( "30m" )
+
+#res2=( "60m" "250m-60" "500m-60" )
+#outsize=( "9120 11040" "4560 5520")
+#addo_levs="4 8"
+#res2=( "30m" "250m-30" "500m-30" )
+#outsize=( "9120 11040" "4560 5520")
+#addo_levs="8 16"
+
+## probio
+
+
+#replace values
+##ogr-replace-values.py amazonia.shp probio_vegtypes_detail.csv 
+##ogr-replace-values.py cerrado.shp probio_vegtypes_detail.csv 
+
+#reproject to wgs84 and sinusoidal
+#ogr2ogr -s_srs EPSG:4618 -t_srs EPSG:4326 cerrado_wgs84.shp cerrado.shp cerrado
+#ogr2ogr -s_srs EPSG:4618 -t_srs  '+proj=sinu +R=6371007.181 +nadgrids=@null +wktext' cerrado_msin.shp cerrado.shp cerrado
+#ogr2ogr -s_srs EPSG:4618 -t_srs EPSG:4326 amazonia_wgs84.shp amazonia.shp amazonia
+#ogr2ogr -s_srs EPSG:4618 -t_srs  '+proj=sinu +R=6371007.181 +nadgrids=@null +wktext' amazonia_msin.shp amazonia.shp amazonia
+
+
+#pg_con=PG:"dbname='gisdb' host='localhost' port='5432' user='gis' password='mypassword'" 
+
+#make low-res maps
+#res1=( "0.1" "0.01" )
+#res2=( "0p1d" "0p01d" )
+#res1=( "0.1" "0.00416666666666667" )
+#res2=( "0p1d" "500m" )
+##res1=( "0.00416666666666667" )
+##res2=( "500m" )
+
+#res1=( "0.00027027" )
+#res2=( "30m" )
+#res1=( "0.1" )
+#res2=( "0p1d" )
+##co_opt=( " " "-co compress=DEFLATE" )
+#res1=( 0.002 )
+#res2=( 0002 )
+#co_opt=( "-co compress=DEFLATE" )
+#res1=( 0.1 0.01 0.002 )
+#res2=( 01 001 0002 )
+#co_opt=( " " "-co compress=DEFLATE" "-co compress=DEFLATE" )
+#name1=( ID_INLAND ID_FORMACA )
+#name2=( INLAND PROBIO )
+##name1=( ID_FORMACA )
+##name2=( PROBIO )
+
+#res1=( 0.00069444444444444 )
+#res2=( "80m" )
+#res1=( 0.000260416666666667 )
+#res2=( "30m" )
+#res1=( 0.000520833333333333 )
+#res2=( "60m" )
+
+#res1=( 0.00416666666666667 )
+#res2=( "500m" )
+
+#res2=( "60m" "250m-60" "500m-60" )
+#outsize=( "9120 11040" "4560 5520")
+#addo_levs="4 8"
+#res2=( "30m" "250m-30" "500m-30" )
+#outsize=( "9120 11040" "4560 5520")
+#addo_levs="8 16"
+
 

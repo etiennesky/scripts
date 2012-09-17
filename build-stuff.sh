@@ -86,10 +86,20 @@ src_conf["gdal"]="./configure --prefix=$SOFT_PREFIX --with-geos=$SOFT_PREFIX/bin
 src_clean["qgis"]="rm -rf $src_prefix/${src_dirs["qgis"]}/*"
 #src_conf["qgis"]="cmake -D CMAKE_INSTALL_PREFIX=$SOFT_PREFIX -D PYTHON_EXECUTABLE=/home/soft/bin/python -D GRASS_PREFIX=/home/soft/grass-6.4.1/  .."
 #src_conf["qgis"]="cmake -D CMAKE_INSTALL_PREFIX=$SOFT_PREFIX -D GRASS_PREFIX=/home/soft/grass-6.4.1/  .."
-src_conf["qgis"]="cmake -DCMAKE_INSTALL_PREFIX=$SOFT_PREFIX  -DPYTHON_LIBRARY=/usr/lib/libpython2.7.so -DWITH_ASTYLE=yes -DWITH_GRASS=no $qgis_apidoc $qgis_build_type .."
+#src_conf["qgis"]="cmake -DCMAKE_INSTALL_PREFIX=$SOFT_PREFIX  -DPYTHON_LIBRARY=/usr/lib/libpython2.7.so -DWITH_ASTYLE=yes -DGRASS_PREFIX=$SOFT_PREFIX/grass-6.4.2/ $qgis_apidoc $qgis_build_type .."
+#cmake -DCMAKE_INSTALL_PREFIX=$SOFT_PREFIX  -DPYTHON_LIBRARY=/usr/lib/libpython2.7.so -DWITH_ASTYLE=yes -DGRASS_PREFIX=NO -DWITH_SPATIALITE=TRUE -DWITH_PYSPATIALITE=TRUE $qgis_apidoc $qgis_build_type ..
+src_conf["qgis"]="cmake -DCMAKE_INSTALL_PREFIX=$SOFT_PREFIX  -DPYTHON_LIBRARY=/usr/lib/libpython2.7.so -DWITH_ASTYLE=yes -DGRASS_PREFIX=NO -DWITH_SPATIALITE=TRUE -DWITH_PYSPATIALITE=TRUE -DWITH_INTERNAL_SPATIALITE=TRUE $qgis_apidoc $qgis_build_type .."
+
+#debian
+#dch -l ~precise  --force-distribution --distribution precise "precise build"
+#dpkg-buildpackage -us -uc -b -j4
 
 #openjpeg
 #cmake -DCMAKE_INSTALL_PREFIX=$SOFT_PREFIX -DBUILD_SHARED_LIBS=YES ..
+
+#grass-6.2.4
+#./configure --prefix=$SOFT_PREFIX --with-tcltk-includes=/usr/include/tcl8.5 --with-geos  --with-proj-share=/usr/share/proj --with-python=/usr/bin/python2.7-config --with-wxwidgets=/usr/bin/wx-config --with-readline --enable-64bit
+#export LD_LIBRARY_PATH="/home/softdev/lib:/home/softdev/grass-6.4.2/lib/"
 
 #do_setup_soft
 
