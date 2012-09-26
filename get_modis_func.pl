@@ -32,9 +32,9 @@ sub get_modis {
     my $ftp_user = @{$ftp_config}[2];
     my $ftp_password = @{$ftp_config}[3];
 
-    my $ofile_config = "${ofile_prefix}-config.txt";
-    my $ofile_ncftp = "${ofile_prefix}-ncftp.txt";
-    my $ofile_ftp = "${ofile_prefix}-ftp.txt";
+    my $ofile_config = "$ofile_prefix-config.txt";
+    my $ofile_ncftp = "$ofile_prefix-ncftp.txt";
+    my $ofile_ftp = "$ofile_prefix-ftp.txt";
     
     print "ftp: @${ftp_config}\n";
     print "years: @years\n";
@@ -114,10 +114,10 @@ foreach my $year (@years) {
 #            @filtered_files3 = grep (/^$prefixes/, @filtered_files2);
 #        }
 #	    print "remote_files1: ".$ftp->ls()."\n";
-	    ##print "remote_files: @remote_files\n";
-	    ##print "filtred_files1: @filtered_files1\n";
-	    ##print "filtred_files2: @filtered_files2\n";
-	    ##print "filtred_files3: @filtered_files3\n";
+	    print "remote_files: @remote_files\n";
+	    print "filtred_files1: @filtered_files1\n";
+	    print "filtred_files2: @filtered_files2\n";
+	    print "filtred_files3: @filtered_files3\n";
 	    foreach my $tmp_file (@filtered_files2) {
 #		    print "get MODIS_Dailies_B/MOLT/MOD09GQ.005/2011.08.01/MOD09GQ.A2011213.h13v10.005.2011215053310.hdf MOD09GQ.A2011213.h13v10.005.2011215053310.hdf
 #		print "get -c $ftp_dir/$tmp_file\n";
