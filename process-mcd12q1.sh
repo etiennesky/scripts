@@ -15,7 +15,8 @@ nodata=255
 init_dest=0
 product="MCD12Q1"
 region="SA"
-idir="../hdf/world"
+#idir="../hdf/world"
+idir="../../../data/modis/mcd12q1/hdf/"
 tiles="h10v08,h11v08,h12v08,h10v09,h11v09,h12v09,h13v09,h14v09,h10v10,h11v10,h12v10,h13v10,h14v10,h11v11,h12v11,h13v11,h14v11,h11v12,h12v12,h13v12,h12v13,h13v13,h13v14,h14v14,h13v08,h09v09,h10v07,h11v07,h09v08,h09v07,h12v07"
 #tiles="h10v08,h11v08,h12v08,h10v09,h11v09,h12v09,h13v09,h14v09,h10v10,h11v10,h12v10,h13v10,h14v10,h11v11,h12v11,h13v11,h14v11,h11v12,h12v12,h13v12,h12v13,h13v13,h13v14,h14v14,h13v08,h09v09,h10v07,h11v07,h09v08,h09v07,h12v07,h14v07,h16v14"
 
@@ -156,7 +157,7 @@ for year in $years ; do
 
     rm -f tmp?.nc
     gdal_translate -co WRITE_BOTTOMUP=FALSE -of netcdf $ofile_wgs tmp1.nc
-    nice -n 10 cdo -f nc -b I8 setname,vegtype tmp1.nc $ofile_nc
+    nice -n 10 cdo -f nc -b I8 -f nc4 -z zip setname,vegtype tmp1.nc $ofile_nc
     rm -f tmp?.nc
     
 done

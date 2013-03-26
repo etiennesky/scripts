@@ -7,6 +7,7 @@
 # libproj-dev flex bison
 ################### declare
 export src_prefix=/data/src
+#export src_prefix=/home/src
 #declare -a src_all=( '$src_hdf5' $src_hdf4 $src_netcdf $src_cdo $src_gdal)
 declare -A src_dirs
 declare -A src_conf
@@ -15,11 +16,13 @@ declare -A results
 #$export src_dirs
 
 src_dirs["szip"]=szip-2.1
-src_dirs["hdf5"]=hdf5-1.8.9/build
-src_dirs["hdf4"]=hdf-4.2.7-patch1
+src_dirs["hdf5"]=hdf5-1.8.9
+src_dirs["hdf4"]=hdf-4.2.8
 src_dirs["udunits"]=udunits-2.1.23
-src_dirs["netcdf"]=netcdf-4.2.1
-src_dirs["cdo"]=cdo-1.5.6.1
+src_dirs["netcdf"]=netcdf-4.2.1.1
+src_dirs["netcdf-fortran"]=netcdf-fortran-4.2
+src_dirs["cdo"]=cdo-1.5.9
+src_dirs["nco"]=nco-4.2.4
 #src_dirs["gdal"]=gdal-1.8.1
 src_dirs["gdal"]=gdal/gdal-svn
 src_dirs["qgis"]=qgis-trunk/Quantum-GIS/build
@@ -34,7 +37,7 @@ if [[ "$flavor" == "soft" ]]; then
 export SOFT_PREFIX="/home/soft"
 setup_soft
 do_it=1
-do_clean=1
+do_clean=0
 src_dirs["gdal"]=/data/src/gdal/svn/branches/1.9/gdal
 src_dirs["qgis"]=/data/src/qgis/Quantum-GIS/build-soft
 #qgis_build_type="-DCMAKE_BUILD_TYPE=RelWithDebInfo"
@@ -42,10 +45,10 @@ qgis_build_type="-DCMAKE_BUILD_TYPE=Release"
 qgis_apidoc=" "
 #src_names=( szip hdf5 hdf4 netcdf cdo gdal )
 #src_names=( hdf5 hdf4 netcdf cdo gdal )
-#src_names=( hdf5 hdf4 udunits netcdf cdo )
+src_names=(  nco )
 #src_names=( hdf4 udunits netcdf cdo )
-src_names=( cdo )
-#src_names=( gdal qgis )
+#src_names=( hdf5 netcdf cdo )
+#src_names=( gdal )
 
 elif [[ "$flavor" == "softdev" ]]; then
 
@@ -53,14 +56,15 @@ elif [[ "$flavor" == "softdev" ]]; then
 export SOFT_PREFIX="/home/softdev"
 setup_softdev
 do_it=1
-do_clean=1
+do_clean=0
 src_dirs["gdal"]=/home/src/gdal/git/gdal/gdal
 src_dirs["qgis"]=qgis-trunk/Quantum-GIS/build-softdev
 qgis_build_type="-DCMAKE_BUILD_TYPE=Debug"
 qgis_apidoc="-DWITH_APIDOC=yes"
 #cmake -D CMAKE_INSTALL_PREFIX=$SOFT_PREFIX  -D PYTHON_LIBRARY=/usr/lib/libpython2.7.so ..
 ##src_names=( szip hdf5 hdf4 udunits netcdf cdo gdal )
-src_names=( gdal )
+#src_names=( gdal )
+src_names=( hdf4 netcdf netcdf-fortran cdo )
 #src_names=( udunits netcdf )
 #src_names=( gdal )
 #src_names=( hdf4 netcdf cdo gdal )
@@ -74,8 +78,9 @@ WITH_SZLIB=''
 src_conf["szip"]="./configure --prefix=$SOFT_PREFIX"
 
 #src_conf["hdf5"]="./configure --prefix=$SOFT_PREFIX $WITH_SZLIB --disable-fortran --enable-cxx "
-src_clean["hdf5"]="rm -rf $src_prefix/${src_dirs["hdf5"]}/*"
-src_conf["hdf5"]="cmake -DCMAKE_INSTALL_PREFIX=$SOFT_PREFIX -DBUILD_SHARED_LIBS=yes .."
+src_conf["hdf5"]="./configure --prefix=$SOFT_PREFIX $WITH_SZLIB --enable-fortran --enable-cxx "
+#src_clean["hdf5"]="rm -rf $src_prefix/${src_dirs["hdf5"]}/*"
+#src_conf["hdf5"]="cmake -DCMAKE_INSTALL_PREFIX=$SOFT_PREFIX -DBUILD_SHARED_LIBS=yes .."
 
 
 #src_conf["hdf4"]="./configure --prefix=$SOFT_PREFIX $WITH_SZLIB --disable-netcdf --disable-fortran --enable-shared"
@@ -86,15 +91,22 @@ src_conf["hdf4"]="./configure --prefix=$SOFT_PREFIX $WITH_SZLIB --enable-netcdf=
 src_conf["udunits"]="./configure --prefix=$SOFT_PREFIX"
 
 src_conf["netcdf"]="./configure --prefix=$SOFT_PREFIX --with-hdf5=$SOFT_PREFIX --enable-netcdf4 --enable-hdf4 --with-hdf4=$SOFT_PREFIX $WITH_SZLIB --with-zlib=/usr --enable-shared "
+src_conf["netcdf-fortran"]="./configure --prefix=$SOFT_PREFIX --with-hdf5=$SOFT_PREFIX --enable-netcdf4 --enable-hdf4 --with-hdf4=$SOFT_PREFIX $WITH_SZLIB --with-zlib=/usr --enable-shared "
 #w/hdf5: ./configure --prefix=/home/softdev  --with-hdf5=/home/softdev --enable-netcdf4 --enable-hdf4 --with-hdf4=/home/softdev --with-szlib=/home/softdev --with-zlib=/usr --enable-shared
 #wo/hdf5: ./configure --prefix=/home/softdev --disable-netcdf-4  --enable-shared
 #netcdf-3: ./configure --prefix=$SOFT_PREFIX --enable-shared
 
-src_conf["cdo"]="./configure --prefix=$SOFT_PREFIX --with-zlib=/usr $WITH_SZLIB --with-hdf5=$SOFT_PREFIX --with-netcdf=$SOFT_PREFIX --with-proj=$SOFT_PREFIX" 
+src_conf["nco"]="./configure --prefix=$SOFT_PREFIX --enable-netcdf4"
+
+src_conf["cdo"]="./configure --prefix=$SOFT_PREFIX --with-zlib=/usr $WITH_SZLIB --with-hdf5=$SOFT_PREFIX --with-netcdf=$SOFT_PREFIX" 
+#TODO fix proj.4.8
+#src_conf["cdo"]="./configure --prefix=$SOFT_PREFIX --with-zlib=/usr $WITH_SZLIB --with-hdf5=$SOFT_PREFIX --with-netcdf=$SOFT_PREFIX --with-proj=$SOFT_PREFIX" 
 #src_conf["gdal"]="./configure --prefix=$SOFT_PREFIX --with-python --with-poppler=yes --with-spatialite=yes  --with-geos=$SOFT_PREFIX/bin/geos-config --with-libtiff=internal --with-geotiff=internal --enable-shared"
 #src_conf["gdal"]="./configure --prefix=$SOFT_PREFIX --with-python --with-poppler=yes --with-spatialite=yes  --with-geos=$SOFT_PREFIX/bin/geos-config --with-libtiff=internal --with-geotiff=internal --enable-shared --with-hdf5=$SOFT_PREFIX --with-netcdf=$SOFT_PREFIX --with-hdf4=$SOFT_PREFIX"
 
-src_conf["gdal"]="./configure --prefix=$SOFT_PREFIX --with-python --with-geos=$SOFT_PREFIX/bin/geos-config --with-libtiff=internal --with-geotiff=internal --enable-shared --with-hdf5=$SOFT_PREFIX --with-netcdf=$SOFT_PREFIX --with-hdf4=$SOFT_PREFIX --with-spatialite=yes --with-mrsid=$SOFT_PREFIX/MrSID_Raster_DSDK --with-openjpeg=$SOFT_PREFIX"
+src_conf["gdal"]="./configure --prefix=$SOFT_PREFIX --with-geos=$SOFT_PREFIX/bin/geos-config --with-libtiff=internal --with-geotiff=internal --enable-shared --with-hdf5=$SOFT_PREFIX --with-netcdf=$SOFT_PREFIX --with-hdf4=$SOFT_PREFIX --with-spatialite=yes --with-mrsid=$SOFT_PREFIX/MrSID_Raster_DSDK --with-openjpeg=$SOFT_PREFIX"
+#TODO add python install
+#src_conf["gdal"]="./configure --prefix=$SOFT_PREFIX --with-geos=$SOFT_PREFIX/bin/geos-config --with-libtiff=internal --with-geotiff=internal --enable-shared --with-hdf5=$SOFT_PREFIX --with-netcdf=$SOFT_PREFIX --with-hdf4=$SOFT_PREFIX --with-spatialite=yes --with-mrsid=$SOFT_PREFIX/MrSID_Raster_DSDK --with-openjpeg=$SOFT_PREFIX"
 #nc3
 #src_conf["gdal"]="./configure --prefix=$SOFT_PREFIX --with-geos=$SOFT_PREFIX/bin/geos-config --with-libtiff=internal --with-geotiff=internal --enable-shared --with-hdf5=$SOFT_PREFIX --with-netcdf=$SOFT_PREFIX --with-hdf4=$SOFT_PREFIX"
 

@@ -10,7 +10,7 @@ source makemap-functions
 function do_probio {
 #csv_file=/data/docs/research/project/data/probio-vegtypes-detail.csv
     csv_file=/data/docs/research/project/data/csv/probio-inland.csv 
-nodata=254
+nodata=127
 mprefix="PROBIO"
 
 name1=( ID_INLAND )

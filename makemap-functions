@@ -3,7 +3,9 @@
 # this script is to rasterize probio shapefiles and make a mosaic
 # see 
 
-set -x
+#set -x
+
+nice_str="nice ionice -c 3"
 
 function do_makemap {
     if [[ "$do_replace" == "1" ]]; then
@@ -45,7 +47,7 @@ function do_reproject {
         rm -f ${area[$i_area]}${proj}.*
         ogrinfo -sql "CREATE SPATIAL INDEX ON ${area[$i_area]}" ${area[$i_area]}.shp
         echo ogr2ogr $proj_s_srs $proj_t_srs ${area[$i_area]}${proj}.shp ${area[$i_area]}.shp ${area[$i_area]}
-        ogr2ogr $proj_s_srs $proj_t_srs ${area[$i_area]}${proj}.shp ${area[$i_area]}.shp ${area[$i_area]}
+        ${nice_str} ogr2ogr $proj_s_srs $proj_t_srs ${area[$i_area]}${proj}.shp ${area[$i_area]}.shp ${area[$i_area]}
         ogrinfo -sql "CREATE SPATIAL INDEX ON ${area[$i_area]}${proj}" ${area[$i_area]}${proj}.shp       
     done
 }        
@@ -59,8 +61,8 @@ function do_rasterize {
         for (( i_name = 0 ; i_name < ${#name1[*]} ; i_name++ )) ; do
             
             #ofile=${area[$i_area]}_${name2[$i_name]}_${res0}.tif
-            #echo nice gdal_rasterize -a_nodata $nodata -init $nodata -tr $res0 $res0 -tap -co compress=DEFLATE -a ${name1[$i_name]} -l ${area[$i_area]} ${area[$i_area]}.shp $ofile 
-            #nice gdal_rasterize -a_nodata $nodata -init $nodata -tr $res0 $res0 -tap -co compress=DEFLATE -a ${name1[$i_name]} -l ${area[$i_area]} ${area[$i_area]}.shp $ofile &
+            #echo ${nice_str} gdal_rasterize -a_nodata $nodata -init $nodata -tr $res0 $res0 -tap -co compress=DEFLATE -a ${name1[$i_name]} -l ${area[$i_area]} ${area[$i_area]}.shp $ofile 
+            #${nice_str} gdal_rasterize -a_nodata $nodata -init $nodata -tr $res0 $res0 -tap -co compress=DEFLATE -a ${name1[$i_name]} -l ${area[$i_area]} ${area[$i_area]}.shp $ofile &
                 
             for (( i_res = 0 ; i_res < ${#res1[*]} ; i_res++ )) ; do
 #        echo $i_res -  ${#res1[*]}  ${#area[*]}  ${#name1[*]}
@@ -68,11 +70,11 @@ function do_rasterize {
                     ofile=${area[$i_area]}_${name2[$i_name]}_${res2[$i_res]}${proj}.tif
                     rm -f $ofile* #tmp-$ofile
 #                    echo gdal_rasterize -ot Byte -a_nodata $nodata -init $nodata -tr ${res1[$i_res]} ${res1[$i_res]} -tap -a ${name1[$i_name]} -l ${area[$i_area]}${proj} ${area[$i_area]}${proj}.shp $ofile
-#                    time nice gdal_rasterize -ot Byte -a_nodata $nodata -init $nodata -tr ${res1[$i_res]} ${res1[$i_res]} -tap -a ${name1[$i_name]} -l ${area[$i_area]}${proj} ${area[$i_area]}${proj}.shp tmp-$ofile
+#                    time ${nice_str} gdal_rasterize -ot Byte -a_nodata $nodata -init $nodata -tr ${res1[$i_res]} ${res1[$i_res]} -tap -a ${name1[$i_name]} -l ${area[$i_area]}${proj} ${area[$i_area]}${proj}.shp tmp-$ofile
  
-                    echo time nice gdal_rasterize ${co_opt[$i_res]} -ot Byte -a_nodata $nodata -init $nodata -tr ${res1[$i_res]} ${res1[$i_res]} $extent -a ${name1[$i_name]} -l ${area[$i_area]}${proj} ${area[$i_area]}${proj}.shp $ofile
-                    time nice gdal_rasterize ${co_opt[$i_res]} -ot Byte -a_nodata $nodata -init $nodata -tr ${res1[$i_res]} ${res1[$i_res]} $extent -a ${name1[$i_name]} -l ${area[$i_area]}${proj} ${area[$i_area]}${proj}.shp $ofile
-#                    nice gdal_translate ${co_opt[$i_res]} tmp-$ofile $ofile
+                    echo time ${nice_str} gdal_rasterize ${co_opt[$i_res]} -ot Byte -a_nodata $nodata -init $nodata -tr ${res1[$i_res]} ${res1[$i_res]} $extent -a ${name1[$i_name]} -l ${area[$i_area]}${proj} ${area[$i_area]}${proj}.shp $ofile
+                    time ${nice_str} gdal_rasterize ${co_opt[$i_res]} -ot Byte -a_nodata $nodata -init $nodata -tr ${res1[$i_res]} ${res1[$i_res]} $extent -a ${name1[$i_name]} -l ${area[$i_area]}${proj} ${area[$i_area]}${proj}.shp $ofile
+#                    ${nice_str} gdal_translate ${co_opt[$i_res]} tmp-$ofile $ofile
 #                    rm tmp-$ofile
 #            gdal_rasterize -a_nodata 0 -init 0 -tr ${res1[$i_res]} ${res1[$i_res]} ${co_opt[$i_res]} -a ${name1[$i_name]} -l ${area[$i_area]} ${area[$i_area]}.shp $ofile 
             done
@@ -92,18 +94,18 @@ function do_rasterize2 {
         for (( i_name = 0 ; i_name < ${#name1[*]} ; i_name++ )) ; do
             
             #ofile=${area[$i_area]}_${name2[$i_name]}_${res0}.tif
-            #echo nice gdal_rasterize -a_nodata $nodata -init $nodata -tr $res0 $res0 -tap -co compress=DEFLATE -a ${name1[$i_name]} -l ${area[$i_area]} ${area[$i_area]}.shp $ofile 
-            #nice gdal_rasterize -a_nodata $nodata -init $nodata -tr $res0 $res0 -tap -co compress=DEFLATE -a ${name1[$i_name]} -l ${area[$i_area]} ${area[$i_area]}.shp $ofile &
+            #echo ${nice_str} gdal_rasterize -a_nodata $nodata -init $nodata -tr $res0 $res0 -tap -co compress=DEFLATE -a ${name1[$i_name]} -l ${area[$i_area]} ${area[$i_area]}.shp $ofile 
+            #${nice_str} gdal_rasterize -a_nodata $nodata -init $nodata -tr $res0 $res0 -tap -co compress=DEFLATE -a ${name1[$i_name]} -l ${area[$i_area]} ${area[$i_area]}.shp $ofile &
                 
             if (( ${#res2[*]} > 1 )); then
                 rm -f ${area[$i_area]}_${name2[$i_name]}_${res2[0]}${proj}.tif.*
-                gdaladdo -ro -clean -r mode --config COMPRESS_OVERVIEW DEFLATE ${area[$i_area]}_${name2[$i_name]}_${res2[0]}${proj}.tif $addo_levs
+                ${nice_str} gdaladdo -ro -clean -r mode --config COMPRESS_OVERVIEW DEFLATE ${area[$i_area]}_${name2[$i_name]}_${res2[0]}${proj}.tif $addo_levs
                 rm -f ${area[$i_area]}_${name2[$i_name]}_${res2[1]}${proj}.tif* 
-                gdal_translate ${co_opt[1]} -outsize ${outsize[0]} ${area[$i_area]}_${name2[$i_name]}_${res2[0]}${proj}.tif ${area[$i_area]}_${name2[$i_name]}_${res2[1]}${proj}.tif 
+                ${nice_str} gdal_translate -a_nodata $nodata ${co_opt[1]} -outsize ${outsize[0]} ${area[$i_area]}_${name2[$i_name]}_${res2[0]}${proj}.tif ${area[$i_area]}_${name2[$i_name]}_${res2[1]}${proj}.tif 
             fi
             if (( ${#res2[*]} > 2 )); then
                 rm -f ${area[$i_area]}_${name2[$i_name]}_${res2[2]}${proj}.tif* 
-                gdal_translate ${co_opt[1]}  -outsize ${outsize[1]} ${area[$i_area]}_${name2[$i_name]}_${res2[0]}${proj}.tif ${area[$i_area]}_${name2[$i_name]}_${res2[2]}${proj}.tif 
+                ${nice_str} gdal_translate -a_nodata $nodata ${co_opt[1]}  -outsize ${outsize[1]} ${area[$i_area]}_${name2[$i_name]}_${res2[0]}${proj}.tif ${area[$i_area]}_${name2[$i_name]}_${res2[2]}${proj}.tif 
             fi
         done
         echo "done ==" 
@@ -125,7 +127,7 @@ function do_mosaic1 {
 #                echo gdalwarp -co compress=DEFLATE -dstnodata $nodata *_${name2[$i_name]}_${res2[$i_res]}${proj}.tif $mfile
 #                gdalwarp -co compress=DEFLATE -dstnodata $nodata *_${name2[$i_name]}_${res2[$i_res]}${proj}.tif $mfile 
                 gdalbuildvrt $vrtfile *_${name2[$i_name]}_${res2[$i_res]}${proj}.tifclip*_${name2[0]}_${res2[0]}${proj}.tif
-    gdal_translate -co compress=DEFLATE -ot Byte tmp1.vrt ${area[0]}_${name2[0]}_${res2[0]}${proj}.tif
+    ${nice_str} gdal_translate -co compress=DEFLATE -ot Byte tmp1.vrt ${area[0]}_${name2[0]}_${res2[0]}${proj}.tif
     rm -f tmp1.vrt
            done
         done
@@ -150,7 +152,7 @@ function do_mosaic {
 #                echo gdalwarp -co compress=DEFLATE -dstnodata $nodata *_${name2[$i_name]}_${res2[$i_res]}${proj}.tif $mfile
 #                gdalwarp -co compress=DEFLATE -dstnodata $nodata *_${name2[$i_name]}_${res2[$i_res]}${proj}.tif $mfile 
                 gdalbuildvrt $vrtfile $ifiles
-                gdal_translate -co compress=DEFLATE -ot Byte $vrtfile $mfile
+                ${nice_str} gdal_translate -co compress=DEFLATE -ot Byte $vrtfile $mfile
                 rm -f $vrtfile
            done
         done

@@ -1,55 +1,18 @@
 #!/bin/bash
 
-# this script is to rasterize probio shapefiles and make a mosaic
-# see 
-
 set -x
 
 source makemap-functions
 
-#replace values
-##ogr-replace-values.py amazonia.shp probio_vegtypes_detail.csv 
-##ogr-replace-values.py cerrado.shp probio_vegtypes_detail.csv 
-
-#reproject to wgs84 and sinusoidal
-#ogr2ogr -s_srs EPSG:4618 -t_srs EPSG:4326 cerrado_wgs84.shp cerrado.shp cerrado
-#ogr2ogr -s_srs EPSG:4618 -t_srs  '+proj=sinu +R=6371007.181 +nadgrids=@null +wktext' cerrado_msin.shp cerrado.shp cerrado
-#ogr2ogr -s_srs EPSG:4618 -t_srs EPSG:4326 amazonia_wgs84.shp amazonia.shp amazonia
-#ogr2ogr -s_srs EPSG:4618 -t_srs  '+proj=sinu +R=6371007.181 +nadgrids=@null +wktext' amazonia_msin.shp amazonia.shp amazonia
-
-
-#pg_con=PG:"dbname='gisdb' host='localhost' port='5432' user='gis' password='mypassword'" 
-
 
 function do_radam {
-csv_file=/data/docs/research/project/data/csv/radam-inland.csv 
-nodata=254
+csv_file=/data/docs/research/project/data/csv/ibge-inland.csv 
+nodata=127
 mprefix="RADAM"
-
-#res1=( "0.1" )
-#res2=( "0p1d" )
-#co_opt=("-co compress=DEFLATE" )
-##res0=1
-#res1=( "0.01" )
-#res2=( "0p01d" )
-#res1=( "0.00416666666666667" )
-#res2=( "500m" )
-#res1=( "0.001041667" "0.0041666667" )
-##res1=( "0.001041667" )
-##res2=( "125m" "250m" "500m" )
-#res1=( "0.0041666667" )
-#res2=( "500m" )
 
 co_opt=("-co compress=DEFLATE" "-co compress=DEFLATE"  "-co compress=DEFLATE" )
 name1=( ID_INLAND )
 name2=( INLAND )
-#name1=( ID_DOMI )
-#name2=( AMALEGAL )
-#area=( amalegal_completo )
-##area=( clip1 clip2 clip3 clip4 )
-#area=( clip1 )
-#area=( amalegal_antropicas amalegal_vegetacao Tensao_vegetacao )
-#proj=wgs84
 proj="_wgs84"
 #proj=""
 #proj_s_srs="-s_srs EPSG:4618"
@@ -69,37 +32,11 @@ proj_t_srs="-t_srs EPSG:4326"
 
 mprefix="amalegal_completo"
 area=( clip1 clip2 clip3 clip4 )
-#area=( clip2 clip3 clip4 )
-#area=( clip1 )
-#res1=( 0.00104166666666667 )
-#res2=( "125m" "250m" "500m" )
-#extent="-te -74.0031249545233 -33.9947916684695 -34.5041666211868 5.504166664867"
 res1=( 0.00069444444444444 )
 res2=( "80m" )
-#res1=( 0.00138888888888889 )
-#res2=( "160m" )
 
 
 extent="-te -74.0031249545233 -33.9947916684695 -34.5034721767424 5.50486110931144"
-
-#extent="-74.00416662119 -34.0000000018028 -34.499999954523865 5.49999999820033"
-#extent="-74.00416662119 -33.9958333351362 -34.5041666211868 5.504166664867"
-##extent="-74.0031249545233 -33.9947916684695 -34.5041666211868 5.504166664867"
-
-#res2=( "125m" "500m" )
-#outsize=( "25% 25%" )
-#addo_levs="4"
-#res1=( "0.0002604167" )
-#res2=( "30m" "250m" "500m" )
-#outsize=( "12.5% 12.5%" "6.25% 6.25%" )
-#addo_levs="2 4 8 16"
-#do_replace=0
-#do_reproject=0
-#do_rasterize=1
-#do_rasterize2=0
-#do_mosaic=1
-#do_make
-##do_mosaic
 
 do_replace2
 do_reproject
@@ -108,36 +45,16 @@ do_rasterize
 do_mosaic
 
 area=( amalegal_completo )
-#area=( "RADAM" )
 
-#res1=( 0.00104166666666667 )
-#res2=( "125m" "250m" "500m" )
-#outsize=( "50% 50%" "25% 25%" )
-#addo_levs="2 4"
-
-res2=( "80m" "250m" "500m" )
-#outsize=( "33.3333333333333% 33.3333333333333%" "16.66666666667% 16.66666666667%" )
-#outsize=( "0.00208333333333333 0.00208333333333333" "0.00416666666666667 0.00416666666666667" )
-outsize=( "18960 18960" "9480 9480" )
-addo_levs="3 6"
-
-#do_replace=0
-#do_reproject=0
-#do_rasterize=0
-#do_rasterize2=1
-##do_rasterize2=0
-##do_combine=0
-#do_mosaic=0
+#res2=( "80m" "250m" "500m" )
+#outsize=( "18960 18960" "9480 9480" )
+#addo_levs="3 6"
+res2=( "80m" "250m" )
+outsize=( "18960 18960" )
+addo_levs="3"
 
 do_rasterize2
 
-#if [[ "$do_combine" == "1" ]]; then
-#    rm -f tmp1.vrt ${area[0]}_${name2[0]}_${res2[0]}${proj}.tif
-#    gdalbuildvrt tmp1.vrt clip*_${name2[0]}_${res2[0]}${proj}.tif
-#    gdal_translate -co compress=DEFLATE -ot Byte tmp1.vrt ${area[0]}_${name2[0]}_${res2[0]}${proj}.tif
-#    rm -f tmp1.vrt
-#fi
-##do_make
 
 }
 

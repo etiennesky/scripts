@@ -10,7 +10,7 @@ source makemap-functions
 function do_ibama {
 #csv_file=/data/docs/research/project/data/probio-vegtypes-detail.csv
     csv_file=/data/docs/research/project/data/csv/ibama_anthropico_cerrado.csv
-nodata=254
+nodata=127
 mprefix="IBAMA"
 
 name1=( ID_DES )
@@ -40,7 +40,7 @@ do_rasterize2
 function do_ibama_cerrado_water {
 #csv_file=/data/docs/research/project/data/probio-vegtypes-detail.csv
     csv_file=""
-nodata=254
+nodata=127
 mprefix="IBAMA"
 
 name1=( ID_WATER )

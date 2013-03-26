@@ -138,7 +138,7 @@ do_rasterize2
 
 function do_prodes {
 csv_file=/data/docs/research/project/data/prodes-inland.csv 
-nodata=100
+nodata=127
 mprefix="PRODES"
 
 res1=( "0.1" )

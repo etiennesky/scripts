@@ -60,7 +60,7 @@ if not old_field_name1 in field_names:
 #    print new_field_name1, " already there"
 #else:
 if not new_field_name1 in field_names:
-#    print new_field_name1, " not existent, creating it"
+    #print new_field_name1, " not existent, creating it"
     new_field1 = ogr.FieldDefn(new_field_name1, ogr.OFTInteger)
     layer.CreateField(new_field1)
 
@@ -68,7 +68,7 @@ if not new_field_name1 in field_names:
 #    print new_field_name2, " already there"
 #else:
 if not new_field_name2 in field_names:
-#    print new_field_name2, " not existent, creating it"
+    #print new_field_name2, " not existent, creating it"
     new_field2 = ogr.FieldDefn(new_field_name2, ogr.OFTInteger)
     layer.CreateField(new_field2)
 
@@ -79,6 +79,7 @@ probioReader = csv.reader(open(csv_file, 'rb'), delimiter=',', quotechar='\"')
 
 first_line = True
 for row in probioReader:
+    #print(str(row))
     if not first_line:
         probioLUT[ row[old_field_id] ] = (int(row[new_field_id1]),(int(row[new_field_id2])))
         line_count = 0
@@ -110,6 +111,9 @@ while feat is not None:
     old_id2 = feat.GetField( c_id_field2 )
     c_name1 = feat.GetField( c_name_field1 )
     c_name2 = feat.GetField( c_name_field2 )
+    #remove third letter (probio-cerrado) - make this an argument???
+    #c_name1 = str(feat.GetField( c_name_field1 ))[:2]
+    #c_name2 = str(feat.GetField( c_name_field2 ))[:2]
 
     #default NC (Unclassified) code
     if c_name1 is None and c_name2 is None:

@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+# /data/docs/research/scripts/inland-tiles.py  inland-2000 inland-tiles-2000.nc inland-yearly-2000-t??.nc
+# inland-tiles.py bla5 ../inland-tiles-2000.nc 1 tiles-tmp00000?.nc
+# 
+
 import sys, os, shutil
 
 import numpy
@@ -12,7 +16,7 @@ from netCDF4 import Dataset, num2date
 # Functions
 
 def Usage():
-    print('Usage: inland-tiles oprefix ifile(s)')
+    print('Usage: inland-tiles oprefix tilefile istile={0,1} ifile(s)')
     print('')
     sys.exit( 1 )
 
@@ -24,7 +28,8 @@ if len(sys.argv) < 3:
       
 oprefix=sys.argv[1]
 tfile=sys.argv[2]
-ifiles=sys.argv[3:]
+istile=sys.argv[3]
+ifiles=sys.argv[4:]
 
 if not os.path.exists(tfile):
     print('tfile '+tfile+' not found')
@@ -49,6 +54,15 @@ print ('ofiles: '+str(ofiles))
 
 # create output files by copying and clearing non-dim vars
 
+def nodataval(var):
+    if "missing_value" in var.ncattrs():
+        nodata = var.getncattr("missing_value") 
+    elif "_FillValue" in var.ncattrs():
+        nodata = var.getncattr("_FillValue") 
+    else:
+        nodata = None
+    return nodata
+    
 ofile = ofiles[0]
 shutil.copyfile( ifiles[0], ofile )
 ods = Dataset(ofile, 'r+')
@@ -57,10 +71,7 @@ for varname in ods.variables:
     if varname in ods.dimensions or varname == "date":
         continue
     var = ods.variables[varname]
-    if "missing_value" in var.ncattrs():
-        nodata = var.getncattr("missing_value") 
-    else:
-        nodata = None
+    nodata = nodataval(var)
     var[:] = nodata
 
 ods.close()
@@ -84,29 +95,47 @@ for j in range(1,nvegtypes+1):
         if varname in ods.dimensions or varname == "date":
             continue
         
+        #print(varname)
         ovar = ods.variables[varname]
-        if "missing_value" in ovar.ncattrs():
-            nodata = ovar.getncattr("missing_value") 
-        else:
-            nodata = None
-        nodata = None #TMP
+        nodata = nodataval(ovar)
+        if istile == "1":
+            nodata = 0
         data = ovar[:]
 
         for i in range(0,len(ifiles)):
             ifile = ifiles[i]
             ids = Dataset(ifiles[i])
             ivar = ids.variables[varname]
+            idata = ivar[:]
 
             if i == 0:
                 data[:] = nodata
+                if istile == "1": 
+                    data2 = 0
+            #print(tds.variables['vegtype'])
             vals = tds.variables['vegtype'][:,i]
             mask = numpy.equal( vals, j )
+            #else:
+            #    data = numpy.choose( mask, (data,idata) )
+            if varname == "tileprop":
+            #if varname == "vegtype":
+                print("ifile: "+ifile+" j: "+str(j))
+                print(idata)
+                print(vals)
+                print(mask)
             
-            data = numpy.choose( mask, (data,ivar) )
+            if istile == "1": 
+                data2 = data2 + numpy.choose( mask, (0,idata) )
+            else:
+                data = numpy.choose( mask, (data,idata) )
+
 
             ids.close()
 
-        ovar[:] = data
+        if istile == "1": 
+            ovar[:] = data2
+        else:
+            ovar[:] = data
         #print(data)
 
     ods.close()
@@ -153,17 +182,15 @@ for varname in ids.variables:
     #print( varname )
     var = ids.variables[varname]
     dim2=list(var.dimensions)
-    dim2.insert(0,"vegtype")
+    #dim2.insert(0,"vegtype")
+    dim2.insert(1,"vegtype")
+    #dim2.insert(len(var.dimensions)-3,"vegtype")
     dim2=tuple(dim2)
     #v = ods.createVariable( varname, var.dtype, var.dimensions )
     v = ods.createVariable( varname, var.dtype, dim2 )
     for a in var.ncattrs():
         v.setncattr( a, getattr(var,a) )
-    if "missing_value" in var.ncattrs():
-        nodata = var.getncattr("missing_value") 
-    else:
-        nodata = None
-    nodata = None #TMP
+    nodata = nodataval(var)
     v[:] = nodata #var[:]
 
 ids.close()
@@ -176,19 +203,19 @@ for varname in ods.variables:
 #for varname in ["npptot"]:
     if varname in ods.dimensions or varname == "date":
         continue
+
+    #print(str(varname))
     data = ods.variables[varname][:]
-    #print(str(data[:]))
 
     for j in range(1,nvegtypes+1):
         ifile = ofiles[j-1]
         ids = Dataset(ifile, 'r')
 
         ivar = ids.variables[varname]
-        data[j-1,] = ivar[:]
+        #data[j-1,] = ivar[:]
+        data[0][j-1,] = ivar[:]
 
-    #print(str(data[:]))
     ods.variables[varname][:] = data
-    #print(str(ods.variables[varname][:]))
 
     ids.close()
 

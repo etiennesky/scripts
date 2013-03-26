@@ -311,7 +311,7 @@ def join_maps(ifile_mosaic,ifile_domin,ofile_ids,ofile_vals,num_join_cats):
     outdataset_ids=None
     outdataset_vals=None
     
-    attach_pct( file_pct, ofile_ids)
+    #attach_pct( file_pct, ofile_ids)
 
     return 1
 
@@ -335,8 +335,11 @@ ifile=sys.argv[2]
 pp = pprint.PrettyPrinter(indent=4, depth=100)
 
 mosaic_levs="2 4 8 16 30 32 64 120 128 256"
-mosaic_outsize="-outsize 94 138"
-mosaic_outsize2="-outsize 188 276" #1/32
+#mosaic_outsize="-outsize 94 138"
+#mosaic_outsize2="-outsize 188 276" #1/32
+mosaic_outsize0p5="-outsize 0.416666667% 0.416666667%"
+mosaic_outsize0p25="-outsize 0.833333333% 0.833333333%"
+mosaic_outsize0p125="-outsize 1.66666667% 1.66666667%"
 options_gtiff="-co COMPRESS=DEFLATE" 
 #join_cats=4
 
@@ -361,9 +364,11 @@ create_options = ['COMPRESS=DEFLATE']
 #ofile_wgs_mosaic2=$product.$var.$region.$year.wgs84.mosaic_05.tif
 ofile_base=os.path.splitext(os.path.basename(ifile))[0]
 ofile_domin_0p5=ofile_base+'.domin_0p5.tif'
+ofile_domin_0p25=ofile_base+'.domin_0p25.tif'
 ofile_domin_0p125=ofile_base+'.domin_0p125.tif'
 ofile_mosaic_all=ofile_base+'.mosaic_all.tif'
 ofile_mosaic_0p5=ofile_base+'.mosaic_0p5.tif'
+ofile_mosaic_0p25=ofile_base+'.mosaic_0p25.tif'
 ofile_mosaic_0p125=ofile_base+'.mosaic_0p125.tif'
 #ofile_join_0p5=ofile_base+'.join_0p5.tif'
 #ofile_ids_0p5=ofile_base+'.ids_0p5.tif'
@@ -436,10 +441,11 @@ elif mtype=='IBIS':
 #vegtype_names[23]="secondary_forest"
 
 elif mtype=='INLAND':
-    vegtype_ids=range(1,22+1)
-    vegtype_ids.append(100)
-    nodata_id=100
-    water_id=16
+    vegtype_ids=range(1,20+1)
+    vegtype_ids.append(30)
+    vegtype_ids.append(127)
+    nodata_id=127
+    water_id=30
     file_pct='/data/research/data/map/colors/inland.pct'
 
     vegtype_names = dict()
@@ -458,14 +464,13 @@ elif mtype=='INLAND':
     vegtype_names[13]="tundra"
     vegtype_names[14]="desert"
     vegtype_names[15]="polar_desert_rock_ice"
-    vegtype_names[16]="water"
-    vegtype_names[17]="urban"
-    vegtype_names[18]="wetlands"
-    vegtype_names[19]="agricultural"
-    vegtype_names[20]="cropland"
-    vegtype_names[21]="pasture"
-    vegtype_names[22]="secondary/reforestation"
-    vegtype_names[100]="unclassified"
+    vegtype_names[16]="wetlands"
+    vegtype_names[17]="cropland"
+    vegtype_names[18]="pasture"
+    vegtype_names[19]="urban"
+    vegtype_names[20]="secondary/reforestation"
+    vegtype_names[30]="water"
+    vegtype_names[127]="unclassified"
 
 
 else:
@@ -496,23 +501,27 @@ print(str(vegtype_names))
 if True:
 #if not os.path.exists(ofile_domin_0p5):
     myexec('gdaladdo -ro -clean -r mode --config COMPRESS_OVERVIEW DEFLATE '+ifile+' '+mosaic_levs)
-    myexec('gdal_translate '+options_gtiff+' '+mosaic_outsize+' '+ifile+' '+ofile_domin_0p5) 
-    attach_pct( file_pct, ofile_domin_0p5)
-    myexec('gdal_translate '+options_gtiff+' '+mosaic_outsize2+' '+ifile+' '+ofile_domin_0p125) 
-    attach_pct( file_pct, ofile_domin_0p125)
+    myexec('gdal_translate '+options_gtiff+' '+mosaic_outsize0p5+' '+ifile+' '+ofile_domin_0p5) 
+    #attach_pct( file_pct, ofile_domin_0p5)
+    myexec('gdal_translate '+options_gtiff+' '+mosaic_outsize0p25+' '+ifile+' '+ofile_domin_0p25) 
+    #attach_pct( file_pct, ofile_domin_0p25)
+    myexec('gdal_translate '+options_gtiff+' '+mosaic_outsize0p125+' '+ifile+' '+ofile_domin_0p125) 
+    #attach_pct( file_pct, ofile_domin_0p125)
 
 #make map levels and compute mosaic levels
 
 if not os.path.exists(ofile_mosaic_all):
     print(ofile_mosaic_all+' does not exist, calling make_map_levels')
     make_map_levels(ifile,ofile_mosaic_all)
-    myexec('time gdaladdo -ro -clean -r average --config COMPRESS_OVERVIEW DEFLATE '+ofile_mosaic_all+' '+mosaic_levs)
+    myexec('nice time gdaladdo -ro -clean -r average --config COMPRESS_OVERVIEW DEFLATE '+ofile_mosaic_all+' '+mosaic_levs)
 
 #extract mosaic levels
 if not os.path.exists(ofile_mosaic_0p5):
-    myexec('gdal_translate '+options_gtiff+' '+mosaic_outsize+' '+ofile_mosaic_all+' '+ofile_mosaic_0p5) 
+    myexec('gdal_translate '+options_gtiff+' '+mosaic_outsize0p5+' '+ofile_mosaic_all+' '+ofile_mosaic_0p5) 
+if not os.path.exists(ofile_mosaic_0p25):
+    myexec('gdal_translate '+options_gtiff+' '+mosaic_outsize0p25+' '+ofile_mosaic_all+' '+ofile_mosaic_0p25) 
 if not os.path.exists(ofile_mosaic_0p125):
-    myexec('gdal_translate '+options_gtiff+' '+mosaic_outsize2+' '+ofile_mosaic_all+' '+ofile_mosaic_0p125) 
+    myexec('gdal_translate '+options_gtiff+' '+mosaic_outsize0p125+' '+ofile_mosaic_all+' '+ofile_mosaic_0p125) 
 
 #join dominant and mosaics
 for res in ['0p5','0p125']:
