@@ -104,11 +104,12 @@ src_conf["cdo"]="./configure --prefix=$SOFT_PREFIX --with-zlib=/usr $WITH_SZLIB 
 #src_conf["gdal"]="./configure --prefix=$SOFT_PREFIX --with-python --with-poppler=yes --with-spatialite=yes  --with-geos=$SOFT_PREFIX/bin/geos-config --with-libtiff=internal --with-geotiff=internal --enable-shared"
 #src_conf["gdal"]="./configure --prefix=$SOFT_PREFIX --with-python --with-poppler=yes --with-spatialite=yes  --with-geos=$SOFT_PREFIX/bin/geos-config --with-libtiff=internal --with-geotiff=internal --enable-shared --with-hdf5=$SOFT_PREFIX --with-netcdf=$SOFT_PREFIX --with-hdf4=$SOFT_PREFIX"
 
-src_conf["gdal"]="./configure --prefix=$SOFT_PREFIX --with-geos=$SOFT_PREFIX/bin/geos-config --with-libtiff=internal --with-geotiff=internal --enable-shared --with-hdf5=$SOFT_PREFIX --with-netcdf=$SOFT_PREFIX --with-hdf4=$SOFT_PREFIX --with-spatialite=yes --with-mrsid=$SOFT_PREFIX/MrSID_Raster_DSDK --with-openjpeg=$SOFT_PREFIX"
+src_conf["gdal"]="./configure --prefix=$SOFT_PREFIX --with-geos --with-libtiff=internal --with-geotiff=internal --enable-shared --with-hdf5=$SOFT_PREFIX --with-netcdf=$SOFT_PREFIX --with-hdf4=$SOFT_PREFIX --with-spatialite=yes --with-mrsid=$SOFT_PREFIX/MrSID_Raster_DSDK" # --with-openjpeg=$SOFT_PREFIX"
 #TODO add python install
 #src_conf["gdal"]="./configure --prefix=$SOFT_PREFIX --with-geos=$SOFT_PREFIX/bin/geos-config --with-libtiff=internal --with-geotiff=internal --enable-shared --with-hdf5=$SOFT_PREFIX --with-netcdf=$SOFT_PREFIX --with-hdf4=$SOFT_PREFIX --with-spatialite=yes --with-mrsid=$SOFT_PREFIX/MrSID_Raster_DSDK --with-openjpeg=$SOFT_PREFIX"
 #nc3
 #src_conf["gdal"]="./configure --prefix=$SOFT_PREFIX --with-geos=$SOFT_PREFIX/bin/geos-config --with-libtiff=internal --with-geotiff=internal --enable-shared --with-hdf5=$SOFT_PREFIX --with-netcdf=$SOFT_PREFIX --with-hdf4=$SOFT_PREFIX"
+#softdev ./configure --prefix=$SOFT_PREFIX --with-geos=/usr/bin/geos-config --with-libtiff=internal --with-geotiff=internal --enable-shared --with-hdf5=$SOFT_PREFIX --with-netcdf=$SOFT_PREFIX --with-hdf4=$SOFT_PREFIX
 
 src_clean["qgis"]="rm -rf $src_prefix/${src_dirs["qgis"]}/*"
 #src_conf["qgis"]="cmake -D CMAKE_INSTALL_PREFIX=$SOFT_PREFIX -D PYTHON_EXECUTABLE=/home/soft/bin/python -D GRASS_PREFIX=/home/soft/grass-6.4.1/  .."

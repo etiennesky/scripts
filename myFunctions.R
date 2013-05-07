@@ -1,9 +1,10 @@
 
 library("rgdal")
+library("raster")
 
 
 #=========================
-#taken from vcd package
+#taken and adapted from vcd package
 myKappa <- function (x, weights = c("Equal-Spacing", "Fleiss-Cohen"))
 {
   if (is.character(weights))
@@ -14,9 +15,15 @@ myKappa <- function (x, weights = c("Equal-Spacing", "Fleiss-Cohen"))
   nc <- ncol(x)
   colFreqs <- colSums(x)/n
   rowFreqs <- rowSums(x)/n
+
+#  print(x)
   
-print(colFreqs)
-print(rowFreqs)
+#print(dim(colFreqs))
+#print(dim(rowFreqs))
+  
+#print(colFreqs)
+#print(rowFreqs)
+
   ## Kappa
   kappa <- function (po, pc)
     (po - pc) / (1 - pc)
@@ -141,6 +148,35 @@ myErrReport <- function (f_cla, f_ref, levels=NULL) {
 #  values2 =t(values)
 #  print(values)
 #  print(values2)
+  invisible(values)
+}
+
+myErrReport2 <- function (r_cla, r_ref, t_cla, t_ref, levels=NULL) {
+
+#  r_cla <- readGDAL(f_cla)
+#  r_ref <- readGDAL(f_ref)
+
+#  cm <- myConfMatrix(classif,ref,levels)
+#  cm <- myConfMatrix(r_cla@data[,1],r_ref@data[,1],levels=0:1)
+  cm <- myConfMatrix(r_cla@data[,1],r_ref@data[,1])
+#  k <- myKappa(cm$cm)
+  
+  factor <- r_cla@grid@cellsize[1]*r_cla@grid@cellsize[2]/1000/1000
+  burned_area <- c(cm$cm[2,3]*factor, cm$cm[3,2]*factor)
+  total_area <- cm$cm[3,3]*factor
+  burned_fraction <- burned_area / total_area
+
+  values=c(
+    burned_area[1],burned_area[2],burned_fraction[1],burned_fraction[2],
+    100*cm$accuracy,100*cm$error_com[2],100*cm$error_omi[2],cm$K,cm$Kloc,cm$Khisto
+    )
+
+  labcols=c(paste(t_cla,".BA",sep=""),paste(t_ref,".BA",sep=""),paste(t_cla,".BF",sep=""),paste(t_ref,".BF",sep=""),
+  "OA","CE","OE","K","Kloc","Khisto")
+  names(values) <- labcols
+  
+#  values <- as.matrix(values,byrow=TRUE)
+#  values2 =t(values)
   invisible(values)
 }
 

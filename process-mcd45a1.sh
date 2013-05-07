@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#years="2010"
-years=`seq 2000 2011`
+years="2010"
+#years=`seq 2000 2011`
 #years=2011
 
 #idir="/data/research/data/modis/modis-fire/hdf"
@@ -18,8 +18,8 @@ nodata=0
 iproduct="MCD45A1"
 product="MCD45"
 region="cerramaz"
-vars="burndate ba_qa"
-#vars="burndate"
+#vars="burndate ba_qa"
+vars="burndate"
 
 for year in $years ; do
     echo "===================================================="

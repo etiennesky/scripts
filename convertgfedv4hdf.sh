@@ -63,3 +63,9 @@ cdo -r -f nc4 -z zip remapbil,${grid2} $ofile1 $ofile2
 rm -f $ofiles tmp?.nc
 
 
+
+
+# cdo -f nc4c -z zip div GFED4.0_MQ_all_BA_05deg.nc gridarea_05deg.nc  GFED4.0_MQ_all_BF_05deg.nc
+# cdo -f nc4c -z zip yearsum -setcalendar,standard GFED4.0_MQ_all_BF_05deg.nc GFED4.0_MQ_yr_BF_05deg.nc
+# cdo -f nc4c -z zip sellonlatbox,-85.25,-29.75,15.25,-60.25 GFED4.0_MQ_yr_BF_05deg.nc  GFED4.0_MQ_yr_BF_05deg_sam.nc
+# cdo ymonmean GFED4.0_MQ_yr_BF_05deg_sam.nc GFED4.0_MQ_yr_BF_05deg_sam_mean.nc

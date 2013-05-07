@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#set -x
+set -x
 
 #years=`seq 1996 2009`
 #months=`seq -w 1 12`
@@ -12,7 +12,7 @@ ofile_suffix="_BA.nc"
 ifiles=`ls -d ${prefix}??????${suffix}`
 #ifiles=`ls -d ${prefix}1996??${suffix}`
 ofiles=""
-grid="../grid_gfedv3"
+grid=`dirname $0`"/grid/grid_gfedv3"
 scale_factor="0.1"
 
 #process each file
@@ -45,7 +45,7 @@ ncatted -a units,BurnedArea,c,c,"km^2"  tmp1.nc
 
 #fix scale_factor, gdal HDF4 driver bug
 #convert to km^2
-cdo -r -f nc -b F32 divc,100 -mulc,${scale_factor} tmp1.nc tmp2.nc
+cdo -r -f nc4c -z zip -b F32 divc,100 -mulc,${scale_factor} tmp1.nc tmp2.nc
 
 ncatted -h -a ,global,d,, tmp2.nc
 
