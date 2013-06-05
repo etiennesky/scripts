@@ -34,6 +34,8 @@
 # this script is meant to be run in the same manner as gdalwarp, but acts on 
 # all subdatasets and joins the results in a unique file. For all formats 
 # except netcdf, files are added to a single .zip file.
+# This script requires the following be installed: 
+# cat, grep, gawk, tail, gdalinfo, gdal_translate, gdalwarp, ncks and zip
 #
 # The following environment variables control internal behaviour:
 # GDALWARP_SDS_NUM_THREADS={#/procs/halfprocs} 
@@ -172,8 +174,8 @@ if [[ ${do_order} == "1" ]] ; then tmp_ofiles=`ls -rS ${tmp_ofiles}` ; fi
 
 if [[ ${dst_format} == "netcdf" ]] ; then
     
-    #ncks_args=""
-    ncks_args="--create_ram --no_tmp_fl"
+    ncks_version=`ncks --version 2>&1 | tail -1 | gawk '{print $3};'`  
+    if [[ "${ncks_version}" > "4.2.0" ]] ; then ncks_args="--create_ram --no_tmp_fl"; else ncks_args="" ; fi
     # with RAM optim: decreasing size = 0m22.048s / increasing size = 0m21.846s
     # without RAM optim: decreasing size = 0m34.101s / increasing size = 0m22.342s
   

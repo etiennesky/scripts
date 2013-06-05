@@ -36,6 +36,8 @@ except ImportError:
     import gdal
     from gdalconst import *
 
+from netCDF4 import Dataset
+
 import sys, os, subprocess
 from glob import glob
 
@@ -45,7 +47,7 @@ def get_projection( src_file ):
 
     dataset = gdal.Open( src_file )
     if dataset is None:
-        print('Unable to open subdataset', src_file, ' for reading')
+        print('Unable to open dataset', src_file, ' for reading')
         sys.exit(1)
     prj = dataset.GetProjectionRef()
 
@@ -53,6 +55,31 @@ def get_projection( src_file ):
 
     return prj
 
+
+def file_has_chunking( src_file):
+    dataset = gdal.Open( src_file )
+    if dataset is None:
+        print('Unable to open dataset', src_file, ' for reading')
+        sys.exit(1)
+    driver = dataset.GetDriver().ShortName.lower()
+    dataset = None
+
+    if driver != 'netcdf':
+        return False
+    
+    try:
+        rootgrp = Dataset( src_file )
+    except RuntimeError:
+        print('Unable to open dataset', src_file, ' for reading')
+        sys.exit(1)
+    for var in rootgrp.variables:
+        chunking = rootgrp.variables[var].chunking()
+        if chunking is not None and len(chunking) > 0:
+            rootgrp.close()
+            return True
+
+    rootgrp.close()
+    return False
 
 #reproj_nc_data(Dir_In, File_Pattern, Dir_Out, s_srs, t_srs, xres, yres, resample, nc_format)
 #"""
@@ -171,12 +198,23 @@ def reproj_nc_file( src_file, dst_file, t_srs, xres, yres, s_srs=None, resample=
     args_format = '-of netcdf'
     args_extra = ''#'-quiet'
 
-    # setum multithreading
+    # setup multithreading
     numthreads = '1'#'halfprocs'
     os.putenv( 'GDALWARP_SDS_NUM_THREADS', numthreads )
 
     if os.path.isfile( dst_file ):
         os.unlink( dst_file )
+
+    # if input file is netcdf-4 with chunking then copy it to a temp. netcdf3 file (chunking bug)
+    # ideally we should test for "bottom-up" configuration, because "top-down" is ok
+    chunking = file_has_chunking( src_file )
+    tmp_file = src_file+'.tmp.nc'
+    if chunking:
+        print 'INFO: file has chunking, converting to netcdf-3 format because of a gdal/netcdf bug with chunking'
+        command = 'ncks -3 %s %s' % (src_file, tmp_file)
+        print('$ '+command)
+        subprocess.call(command, shell=True)
+        src_file = tmp_file
 
     command = 'nice gdalwarp_sds.sh %s %s %s %s %s %s %s %s %s %s %s' %\
         ( args_format, args_s_srs, args_t_srs, args_tr, args_resample, \
@@ -184,6 +222,8 @@ def reproj_nc_file( src_file, dst_file, t_srs, xres, yres, s_srs=None, resample=
     print('$ '+command)
     subprocess.call(command, shell=True)
 
+    if chunking:
+        os.unlink( tmp_file )
 
 
 
