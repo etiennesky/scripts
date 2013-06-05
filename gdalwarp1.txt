@@ -1,0 +1,45 @@
+1) intall build environment
+
+> sudo apt-get install build-essential netcdf-bin libnetcdf-dev libgeos-dev libproj-dev python3-dev subversion
+(for python: swig python-dev)
+
+
+2) get gdal-1.10 from svn
+
+> svn checkout https://svn.osgeo.org/gdal/branches/1.10/gdal gdal-1.10
+
+
+3) build gdal
+
+> cd gdal-1.10
+
+> ./configure --with-geos --with-libtiff=internal --with-geotiff=internal --enable-shared --with-netcdf
+
+> make -j4
+> sudo make install
+
+> export LD_LIBRARY_PATH=/usr/local/lib
+
+> cd swig/python
+> python3 setup.py build
+> sudo python3 setup.py install
+> export PYTHONPATH=/usr/local/lib/python3.2/site-packages
+
+( add export statements to $HOME/.bashrc )
+ 
+
+4) test gdal
+
+> cd $HOME
+> gdalinfo --format netcdf
+( look for NC4 and NC4C formats in gdalinfo output )
+> python3
+> from osgeo import gdal
+
+
+
+
+
+
+
+
