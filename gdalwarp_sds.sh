@@ -173,8 +173,8 @@ wait
 if [[ ${do_order} == "1" ]] ; then tmp_ofiles=`ls -rS ${tmp_ofiles}` ; fi
 
 if [[ ${dst_format} == "netcdf" ]] ; then
-    
-    ncks_version=`ncks --version 2>&1 | tail -1 | gawk '{print $3};'`  
+    myncks='ncks'
+    ncks_version=`$myncks --version 2>&1 | tail -1 | gawk '{print $3};'`  
     if [[ "${ncks_version}" > "4.2.0" ]] ; then ncks_args="--create_ram --no_tmp_fl"; else ncks_args="" ; fi
     # with RAM optim: decreasing size = 0m22.048s / increasing size = 0m21.846s
     # without RAM optim: decreasing size = 0m34.101s / increasing size = 0m22.342s
@@ -183,8 +183,8 @@ if [[ ${dst_format} == "netcdf" ]] ; then
 
     # append each var to dst file using ncks -A
     for ofile in ${tmp_ofiles} ; do
-        echo "$" ncks ${ncks_args} -A $ofile ${dst_file}
-        nice ncks ${ncks_args} -A $ofile ${dst_file}
+        echo "$" $myncks ${ncks_args} -A $ofile ${dst_file}
+        nice $myncks ${ncks_args} -A $ofile ${dst_file}
     done
     
     echo ""

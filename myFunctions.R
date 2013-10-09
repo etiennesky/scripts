@@ -1,3 +1,7 @@
+# to install in ubuntu:
+# install r-cran-spatial
+# run chooseCRANmirror()
+# run install.packages() : car stringr packages rgdal raster
 
 library("rgdal")
 library("raster")
@@ -159,20 +163,23 @@ myErrReport2 <- function (r_cla, r_ref, t_cla, t_ref, levels=NULL) {
 #  cm <- myConfMatrix(classif,ref,levels)
 #  cm <- myConfMatrix(r_cla@data[,1],r_ref@data[,1],levels=0:1)
   cm <- myConfMatrix(r_cla@data[,1],r_ref@data[,1])
+#  print(cm)
 #  k <- myKappa(cm$cm)
   
   factor <- r_cla@grid@cellsize[1]*r_cla@grid@cellsize[2]/1000/1000
-  burned_area <- c(cm$cm[2,3]*factor, cm$cm[3,2]*factor)
+  burned_area <- c(cm$cm[2,3], cm$cm[3,2],cm$cm[2,1],cm$cm[1,2],cm$cm[2,2]) * factor
   total_area <- cm$cm[3,3]*factor
   burned_fraction <- burned_area / total_area
 
   values=c(
-    burned_area[1],burned_area[2],burned_fraction[1],burned_fraction[2],
+    burned_area[1],burned_area[2],burned_area[3],burned_area[4],burned_area[5],burned_fraction[1],burned_fraction[2],burned_fraction[3],burned_fraction[4],burned_fraction[5],
     100*cm$accuracy,100*cm$error_com[2],100*cm$error_omi[2],cm$K,cm$Kloc,cm$Khisto
     )
 
-  labcols=c(paste(t_cla,".BA",sep=""),paste(t_ref,".BA",sep=""),paste(t_cla,".BF",sep=""),paste(t_ref,".BF",sep=""),
-  "OA","CE","OE","K","Kloc","Khisto")
+  #labcols=c(paste(t_cla,".BA",sep=""),paste(t_ref,".BA",sep=""),paste(t_cla,".BF",sep=""),paste(t_ref,".BF",sep=""),
+  #"OA","CE","OE","K","Kloc","Khisto")
+  labcols=c(paste(t_cla,".BA",sep=""),paste(t_ref,".BA",sep=""),paste(t_cla,"_only.BA",sep=""),paste(t_ref,"_only.BA",sep=""),"join.BA",paste(t_cla,".BF",sep=""),paste(t_ref,".BF",sep=""),
+  paste(t_cla,"_only.BF",sep=""),paste(t_ref,"_only.BF",sep=""),"join.BF","OA","CE","OE","K","Kloc","Khisto")
   names(values) <- labcols
   
 #  values <- as.matrix(values,byrow=TRUE)
@@ -223,4 +230,18 @@ get_ylim <- function(data,min=NULL,max=NULL,scale=0.10) {
   if (min!=0) min <- min - abs(min*scale)
   if (max!=0) max <- max + abs(max*scale)
   invisible(c(min,max))
+}
+
+
+#http://stackoverflow.com/questions/9314658/colorbar-from-custom-colorramppalette
+color.bar <- function(lut, min, max=-min, nticks=11, ticks=seq(min, max, len=nticks), title='') {
+scale = (length(lut)-1)/(max-min)
+ 
+#dev.new(width=1.75, height=5)
+plot(c(0,10), c(min,max), type='n', bty='n', xaxt='n', xlab='', yaxt='n', ylab='', main=title)
+axis(2, ticks, las=1)
+for (i in 1:(length(lut)-1)) {
+y = (i-1)/scale + min
+rect(0,y,10,y+1/scale, col=lut[i], border=NA)
+}	
 }

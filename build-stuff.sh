@@ -6,8 +6,8 @@
 # needs
 # libproj-dev flex bison
 ################### declare
-export src_prefix=/data/src
-#export src_prefix=/home/src
+#export src_prefix=/data/src
+export src_prefix=/home/src
 #declare -a src_all=( '$src_hdf5' $src_hdf4 $src_netcdf $src_cdo $src_gdal)
 declare -A src_dirs
 declare -A src_conf
@@ -21,8 +21,8 @@ src_dirs["hdf4"]=hdf-4.2.8
 src_dirs["udunits"]=udunits-2.1.23
 src_dirs["netcdf"]=netcdf-4.2.1.1
 src_dirs["netcdf-fortran"]=netcdf-fortran-4.2
-src_dirs["cdo"]=cdo-1.5.9
-src_dirs["nco"]=nco-4.2.4
+src_dirs["cdo"]=cdo-1.6.1
+src_dirs["nco"]=nco-4.3.1
 #src_dirs["gdal"]=gdal-1.8.1
 src_dirs["gdal"]=gdal/gdal-svn
 src_dirs["qgis"]=qgis-trunk/Quantum-GIS/build
@@ -38,17 +38,13 @@ export SOFT_PREFIX="/home/soft"
 setup_soft
 do_it=1
 do_clean=0
-src_dirs["gdal"]=/data/src/gdal/svn/branches/1.9/gdal
-src_dirs["qgis"]=/data/src/qgis/Quantum-GIS/build-soft
+src_dirs["gdal"]=/data/src/gdal/svn/branches/1.10/gdal
+src_dirs["qgis"]=/data/src/qgis/qgis-master/build-release
 #qgis_build_type="-DCMAKE_BUILD_TYPE=RelWithDebInfo"
 qgis_build_type="-DCMAKE_BUILD_TYPE=Release"
 qgis_apidoc=" "
-#src_names=( szip hdf5 hdf4 netcdf cdo gdal )
-#src_names=( hdf5 hdf4 netcdf cdo gdal )
-src_names=(  nco )
-#src_names=( hdf4 udunits netcdf cdo )
-#src_names=( hdf5 netcdf cdo )
-#src_names=( gdal )
+#src_names=(  hdf4 hdf5 netcdf udunits nco cdo )
+src_names=( qgis )
 
 elif [[ "$flavor" == "softdev" ]]; then
 
@@ -62,12 +58,8 @@ src_dirs["qgis"]=qgis-trunk/Quantum-GIS/build-softdev
 qgis_build_type="-DCMAKE_BUILD_TYPE=Debug"
 qgis_apidoc="-DWITH_APIDOC=yes"
 #cmake -D CMAKE_INSTALL_PREFIX=$SOFT_PREFIX  -D PYTHON_LIBRARY=/usr/lib/libpython2.7.so ..
-##src_names=( szip hdf5 hdf4 udunits netcdf cdo gdal )
-#src_names=( gdal )
-src_names=( hdf4 netcdf netcdf-fortran cdo )
-#src_names=( udunits netcdf )
-#src_names=( gdal )
-#src_names=( hdf4 netcdf cdo gdal )
+#src_names=(  hdf4 hdf5 netcdf udunits nco cdo )
+src_names=( qgis )
 
 fi
 
@@ -96,9 +88,9 @@ src_conf["netcdf-fortran"]="./configure --prefix=$SOFT_PREFIX --with-hdf5=$SOFT_
 #wo/hdf5: ./configure --prefix=/home/softdev --disable-netcdf-4  --enable-shared
 #netcdf-3: ./configure --prefix=$SOFT_PREFIX --enable-shared
 
-src_conf["nco"]="./configure --prefix=$SOFT_PREFIX --enable-netcdf4"
+src_conf["nco"]="./configure --prefix=$SOFT_PREFIX --enable-netcdf4 --with-hdf5=$SOFT_PREFIX --with-netcdf=$SOFT_PREFIX --with-udunits2=$SOFT_PREFIX"
 
-src_conf["cdo"]="./configure --prefix=$SOFT_PREFIX --with-zlib=/usr $WITH_SZLIB --with-hdf5=$SOFT_PREFIX --with-netcdf=$SOFT_PREFIX" 
+src_conf["cdo"]="./configure --prefix=$SOFT_PREFIX --with-zlib=/usr $WITH_SZLIB --with-hdf5=$SOFT_PREFIX --with-netcdf=$SOFT_PREFIX --with-udunits2=$SOFT_PREFIX --with-proj" 
 #TODO fix proj.4.8
 #src_conf["cdo"]="./configure --prefix=$SOFT_PREFIX --with-zlib=/usr $WITH_SZLIB --with-hdf5=$SOFT_PREFIX --with-netcdf=$SOFT_PREFIX --with-proj=$SOFT_PREFIX" 
 #src_conf["gdal"]="./configure --prefix=$SOFT_PREFIX --with-python --with-poppler=yes --with-spatialite=yes  --with-geos=$SOFT_PREFIX/bin/geos-config --with-libtiff=internal --with-geotiff=internal --enable-shared"
@@ -114,7 +106,7 @@ src_conf["gdal"]="./configure --prefix=$SOFT_PREFIX --with-geos --with-libtiff=i
 src_clean["qgis"]="rm -rf $src_prefix/${src_dirs["qgis"]}/*"
 #src_conf["qgis"]="cmake -D CMAKE_INSTALL_PREFIX=$SOFT_PREFIX -D PYTHON_EXECUTABLE=/home/soft/bin/python -D GRASS_PREFIX=/home/soft/grass-6.4.1/  .."
 #src_conf["qgis"]="cmake -D CMAKE_INSTALL_PREFIX=$SOFT_PREFIX -D GRASS_PREFIX=/home/soft/grass-6.4.1/  .."
-src_conf["qgis"]="cmake -DCMAKE_INSTALL_PREFIX=$SOFT_PREFIX  -DPYTHON_LIBRARY=/usr/lib/libpython2.7.so -DWITH_ASTYLE=yes -DGRASS_PREFIX=$SOFT_PREFIX/grass-6.4.2/ $qgis_apidoc $qgis_build_type .."
+src_conf["qgis"]="cmake -DCMAKE_INSTALL_PREFIX=$SOFT_PREFIX  -DPYTHON_LIBRARY=/usr/lib/python2.7/config-x86_64-linux-gnu/libpython2.7.so -DWITH_ASTYLE=yes -DQWT_INCLUDE_DIR=/usr/include/qwt-qt4 $qgis_apidoc $qgis_build_type .."
 
 #openjpeg
 #cmake -DCMAKE_INSTALL_PREFIX=$SOFT_PREFIX -DBUILD_SHARED_LIBS=YES ..
@@ -208,9 +200,10 @@ for src_name in ${src_names[*]}; do
 done
 
 #for python-3.2
+#cd swig/python
 #alias python='/usr/bin/python3.2'
 #export PYTHONPATH="/home/softdev/lib/python3.2/site-packages/"
-#python2.7 setup.py install --prefix=/home/softdevcd swig/python
+#python2.7 setup.py install --prefix=/home/softdev
 #this works:
 # python3.2 /home/softdev/bin/virtualenv.py /home/softdev/
 # python3.2 setup.py build
@@ -227,3 +220,8 @@ done
 #szip: ./configure --prefix=$SOFT_PREFIX --enable-shared=no
 #hdf5: ./configure --prefix=$SOFT_PREFIX --disable-fortran --enable-cxx  --disable-shared
 #netcdf: ./configure --prefix=$SOFT_PREFIX --with-hdf5=$SOFT_PREFIX --enable-netcdf4 ---with-zlib=/usr --disable-shared ./configure --prefix=$SOFT_PREFIX --with-geos=$SOFT_PREFIX/bin/geos-configgdal: --with-libtiff=internal --with-geotiff=internal --enable-shared --with-hdf5=$SOFT_PREFIX --with-netcdf=$SOFT_PREFIX --with-hdf4=$SOFT_PREFIX --disable-shared
+
+
+# prerequisites
+# sudo apt-get install build-essential libz-dev bison flex libjpeg6.2-dev libjpeg8-dev gfortran
+# all from QGIS install page
