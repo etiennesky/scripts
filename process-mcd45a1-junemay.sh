@@ -2,6 +2,12 @@
 
 #set -x
 
+# get mcd64
+# -- mcd64a1
+#wget ftp://fire:burnt@fuoco.geog.umd.edu/db/MCD64A1/h12v08/MCD64A1.A2010*.hdf
+# wget ftp://fire:burnt@fuoco.geog.umd.edu/db/MCD64A1/h13v09/MCD64A1.A*.hdf
+# wget ftp://fire:burnt@fuoco.geog.umd.edu/db/MCD64A1/h13v10/MCD64A1.A200*.hdf ; wget ftp://fire:burnt@fuoco.geog.umd.edu/db/MCD64A1/h13v11/MCD64A1.A200*.hdf ; wget ftp://fire:burnt@fuoco.geog.umd.edu/db/MCD64A1/h12v10/MCD64A1.A200*.hdf ; wget ftp://fire:burnt@fuoco.geog.umd.edu/db/MCD64A1/h12v11/MCD64A1.A200*.hdf
+
 source /data/docs/research/bin/functions
 
 years1=( `seq 2000 2010` )

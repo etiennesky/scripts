@@ -1,6 +1,5 @@
 #! /bin/bash
 
-
 #set -x 
 source functions
 
@@ -88,9 +87,11 @@ echo ${pn_data[@]}
 declare -a dst_data_tm=("TM" "EPSG:32722" "-" "-")
 declare -a dst_data_l3jrc=("L3JRC" "EPSG:4326" "sam" "wgs84")
 #declare -a dst_data_mcd45=("MCD45" "+proj=sinu +R=6371007.181 +nadgrids=@null +wktext")
-declare -a dst_data_modis=("MCD45" "+proj=sinu +R=6371007.181 +nadgrids=@null +wktext" "cerrado" "sin")
+declare -a dst_data_mcd45=("MCD45" "+proj=sinu +R=6371007.181 +nadgrids=@null +wktext" "cerrado" "sin")
+declare -a dst_data_mcd64=("MCD64" "+proj=sinu +R=6371007.181 +nadgrids=@null +wktext" "cerrado" "sin")
 
-dst_modis=0
+dst_mcd45=0
+dst_mcd64=0
 dst_tm=0
 dst_l3jrc=0
 dst_proj=""
@@ -104,13 +105,17 @@ case "$dst_name" in
 	dst_l3jrc=1
 	declare -a dst_data=( "${dst_data_l3jrc[@]}" )
 	;;
-    modis|MCD45)
-	dst_modis=1
-	declare -a dst_data=( "${dst_data_modis[@]}" )
+    MCD45)
+	dst_mcd45=1
+	declare -a dst_data=( "${dst_data_mcd45[@]}" )
+	;;
+    MCD64)
+	dst_mcd64=1
+	declare -a dst_data=( "${dst_data_mcd64[@]}" )
 	;;
     *)
 	usage
-	echo "ERROR: <dstype> must be one of: MCD45 modis TM l3JRC"
+	echo "ERROR: <dstype> must be one of: MCD45 MCD64 TM l3JRC"
 	exit 1
 
 esac
@@ -165,8 +170,12 @@ for ifile in $ifiles ; do
 	    year1=${ifile1:3:2}
 	    year2=${ifile1:9:2}
 	    if [[ ${year1:0:1} -eq "9" ]]; then year1="19"$year1 ; else year1="20"$year1; fi
-	    if [[ ${year2:0:1} -eq "9" ]]; then year2="19"$year2 ; else year2="20"$year2; fi
+	    if [[ ${year2:0:1} -eq "9" ]]; then year2="19"$year2 ; else year2="20"$year2; fi      
 	    year=$year1
+#        year=${ifile1: -8:4}
+#        year1=$year
+#        year2=$(($year1+1))
+
 	else
 	    year="2010"
 	fi
@@ -184,6 +193,8 @@ for ifile in $ifiles ; do
 	ofile2=`echo $ofile1 |  sed 's/-area//'`
 	ofile3=`echo $ofile2 |  sed 's/burndate/burnpix/'`
     fi
+
+    echo years: $year1 $year2
     echo ifile: $ifile
     echo ofiles: $ofile1 $ofile2 $ofile3
  
@@ -261,6 +272,7 @@ for ifile in $ifiles ; do
     mv tmp3.tif $ofile3
     rm -f tmp?.tif *.aux.xml
 
+
 done
 
 } #end function
@@ -269,34 +281,27 @@ done
 function do_clip ()
 {
 
-
     #PNSci optional? dont have tiffs yet
 #    for pn in PNCG PNB PNCV PNE PNSCa PNSCi ; do
-#    for pn in PNB PNE PNSCa PNSCi ; do
-    for pn in PNCV ; do
-#    for pn in PNE ; do
+    for pn in PNE ; do
 	echo ++++++++++++++++++++++++++++++ $pn
 	echo ++++++++++++++++++++++++++++++ $pn
-#	do-clip-pn MCD45 $pn MCD45.burndate.cerrado.jun2010-dec2010.sin.tif
-#	do-clip-pn MCD45 $pn /MCD45.burndate.cerrado.jun2005*.sin.tif
-#	do-clip-pn L3JRC $pn L3JRC.burndate.sam.2005-2006.wgs84.tif
-##	do-clip-pn MCD45 $pn /data/research/work/modis/2000-2010_jun-may/MCD45.burndate.*.sin.tif
-	do-clip-pn MCD45 $pn /data/research/work/modis/2000-2010_jun-may/MCD45.burndate.cerrado.*.sin.tif
-#	do-clip-pn MCD45 $pn /data/research/work/modis/2000-2010_jun-may/MCD45.burndate.cerrado.2010*.sin.tif
-	do-clip-pn L3JRC $pn /data/research/work/l3jrc/L3JRC.burndate.sam.*.wgs84.tif
+##	do-clip-pn MCD45 $pn /data/research/work/modis/mcd45/jun-may/MCD45.burndate.cerrado.*.sin.tif
+##	do-clip-pn MCD64 $pn /data/research/work/modis/mcd64/jun-may/MCD64.burndate.cerrado.*.sin.tif
+##	do-clip-pn L3JRC $pn /data/research/work/l3jrc/L3JRC.burndate.sam.*.wgs84.tif
     done
-    exit
 
-#    do-clip-pn TM PNCG Tiff/Guimaraes/Queimada2010.tif 
-#    do-clip-pn TM PNB Tiff/Brasilia/Queimada-2010-PNB-ant.tif
-#    do-clip-pn TM PNCV Tiff/Veadeiros/Queimada-2010.tif 
+#    exit
 
-    do-clip-pn TM PNE Tiff/Emas/Jun*.tif 
-    do-clip-pn TM PNSCa Tiff/Canastra/jun*.tif 
+#    do-clip-pn TM PNCG ../../Dados_UC/Tiff/Guimaraes/Queimada2010.tif 
+#    do-clip-pn TM PNB ../../Dados_UC/Tiff/Brasilia/Queimada-2010-PNB-ant.tif
+#    do-clip-pn TM PNCV ../../Dados_UC/Tiff/Veadeiros/Queimada-2010.tif 
+    do-clip-pn TM PNE ../../Dados_UC/Tiff/Emas/Jun*.tif 
+    do-clip-pn TM PNSCa ../../Dados_UC/Tiff/Canastra/jun*.tif 
 #    do-clip-pn TM PNE Tiff/Emas/Jun10-Mai11.tif 
 #    do-clip-pn TM PNSCa Tiff/Canastra/jun10_mai11.tif 
 
-#    exit
+    exit
 
 
 }

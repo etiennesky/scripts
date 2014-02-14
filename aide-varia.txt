@@ -150,3 +150,12 @@ for yy in 2010 2009 ; do for mm in "09" "10"; do for dd in `seq -w 1 31`; do ech
 
 # get mcd45 gtiff
 for win in `seq -w 01 24` ; do echo $win ; wget -nc -c ftp://user:burnt_data@ba1.geog.umd.edu:/TIFF/Win${win}/2010/*burndate* ; done
+
+
+
+# make scene mask
+gdal_rasterize -tr 0.05 0.05 -burn 1 -a scene -init 0 map_wgs84.shp map-0_05d.tif
+gdalwarp -tr 0.25 0.25 -tap -r average -overwrite map-0_05d.tif tmp1.tif
+val_repl.py  -ot Byte -in 1 -out 0 -a_nodata 0 -c lt  tmp1.tif map-0_25d-1.tif
+val_repl.py  -in 0.9 -out 0 -c lt  tmp1.tif map-0_25d-0_9.tif
+

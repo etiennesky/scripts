@@ -5,12 +5,16 @@
 
 library("rgdal")
 library("raster")
+library(car)
+library(stringr)
+library(plotrix)
 
 
 #=========================
 #taken and adapted from vcd package
 myKappa <- function (x, weights = c("Equal-Spacing", "Fleiss-Cohen"))
 {
+  #print("function myKappa")
   if (is.character(weights))
       weights <- match.arg(weights)
 
@@ -20,14 +24,8 @@ myKappa <- function (x, weights = c("Equal-Spacing", "Fleiss-Cohen"))
   colFreqs <- colSums(x)/n
   rowFreqs <- rowSums(x)/n
 
-#  print(x)
+  #print(x)
   
-#print(dim(colFreqs))
-#print(dim(rowFreqs))
-  
-#print(colFreqs)
-#print(rowFreqs)
-
   ## Kappa
   kappa <- function (po, pc)
     (po - pc) / (1 - pc)
@@ -36,6 +34,7 @@ myKappa <- function (x, weights = c("Equal-Spacing", "Fleiss-Cohen"))
     
   ## unweighted
   po <- sum(d) / n
+
   pc <- crossprod(colFreqs, rowFreqs)
   k <- kappa(po, pc)
   s <- std(po, pc)
@@ -86,7 +85,7 @@ myConfMatrix <- function (classif, ref, levels=NULL) {
     ref <- factor(ref,levels=levels)
   }
   x <- table(classif,ref)
-#print(x)
+  
 #  x <- x + 1
   x2 <- addmargins(x)
   k <- myKappa(x)
@@ -121,14 +120,12 @@ myConfMatrix <- function (classif, ref, levels=NULL) {
 #myErrReport <- function (r_cla, r_ref) {
 myErrReport <- function (f_cla, f_ref, levels=NULL) {
 
+  print(paste("myErrRepor(",f_cla,",",f_ref))
+  
   r_cla <- readGDAL(f_cla)
   r_ref <- readGDAL(f_ref)
 
-#print(r_cla@data[,1])
-#print(r_ref@data[,1])
-#  cm <- myConfMatrix(classif,ref,levels)
-#  cm <- myConfMatrix(r_cla@data[,1],r_ref@data[,1],levels=0:1)
-  cm <- myConfMatrix(r_cla@data[,1],r_ref@data[,1])
+  cm <- myConfMatrix(r_cla@data[,1],r_ref@data[,1], levels)
 #  k <- myKappa(cm$cm)
   
 #  str(cm)
@@ -223,12 +220,21 @@ myErrorReport <- function (x) {
 }
 
 
-get_ylim <- function(data,min=NULL,max=NULL,scale=0.10) {
+get_ylim <- function(data,min=NULL,max=NULL,scale=0.10,clipmin=TRUE) {
   if (is.null(min)) min <- min(data,na.rm=TRUE)
   if (is.null(max)) max <- max(data,na.rm=TRUE)
+
   if (max<0) max <- 0
-  if (min!=0) min <- min - abs(min*scale)
-  if (max!=0) max <- max + abs(max*scale)
+  if (clipmin){
+    if (min<0)
+      min <- min - abs((max-min)*scale)
+    else
+      min <- 0
+  }
+  else
+    min <- min - abs((max-min)*scale)
+  if (max!=0) max <- max + abs((max-min)*scale)
+
   invisible(c(min,max))
 }
 

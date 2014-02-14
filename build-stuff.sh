@@ -22,7 +22,7 @@ src_dirs["udunits"]=udunits-2.1.23
 src_dirs["netcdf"]=netcdf-4.2.1.1
 src_dirs["netcdf-fortran"]=netcdf-fortran-4.2
 src_dirs["cdo"]=cdo-1.6.1
-src_dirs["nco"]=nco-4.3.1
+src_dirs["nco"]=nco-4.3.6
 #src_dirs["gdal"]=gdal-1.8.1
 src_dirs["gdal"]=gdal/gdal-svn
 src_dirs["qgis"]=qgis-trunk/Quantum-GIS/build
@@ -88,7 +88,7 @@ src_conf["netcdf-fortran"]="./configure --prefix=$SOFT_PREFIX --with-hdf5=$SOFT_
 #wo/hdf5: ./configure --prefix=/home/softdev --disable-netcdf-4  --enable-shared
 #netcdf-3: ./configure --prefix=$SOFT_PREFIX --enable-shared
 
-src_conf["nco"]="./configure --prefix=$SOFT_PREFIX --enable-netcdf4 --with-hdf5=$SOFT_PREFIX --with-netcdf=$SOFT_PREFIX --with-udunits2=$SOFT_PREFIX"
+src_conf["nco"]="./configure --prefix=$SOFT_PREFIX --enable-netcdf4 --with-hdf5=$SOFT_PREFIX --with-netcdf=$SOFT_PREFIX --with-udunits2=$SOFT_PREFIX --enable-ncap2" # requires antlr
 
 src_conf["cdo"]="./configure --prefix=$SOFT_PREFIX --with-zlib=/usr $WITH_SZLIB --with-hdf5=$SOFT_PREFIX --with-netcdf=$SOFT_PREFIX --with-udunits2=$SOFT_PREFIX --with-proj" 
 #TODO fix proj.4.8
